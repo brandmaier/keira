@@ -1,0 +1,154 @@
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+
+library(shiny)
+library(exams)
+
+std_text =  paste0("Hinweise: \\\\",
+"\\begin{itemize}",
+"\\item Die Klausur besteht aus 3 geschlossenen Fragen mit vorgegebenen Antwortm\\\"oglichkeiten (jeweils eine Antwort ist richtig) ",
+"\\item Bitte pr\\\"ufen Sie vor der Abgabe, dass Sie alle Fragen auf dem Deckblatt beantwortet haben. Nur die Antworten auf dem Deckblatt werden ber\\\"ucksichtigt.",
+"\\item Viel Erfolg!",
+"\\end{itemize}",
+"\\vspace{0.5cm}", sep="", collapse="")
+
+
+page1 <- fluidPage(
+
+shiny::textInput("title","Titel der Klausur", value="M25 - Forschungsmethodik"),
+shiny::textInput("course","Modulnummer", value="M25"),
+shiny::checkboxInput("showpoints", "Punktzahl anzeigen",value = TRUE),
+shiny::fileInput("docx_file", "Klausur Word Dokument"),
+#sliderInput("n",
+#            "Anzahl von Exemplaren:",
+#            min = 1,
+#            max = 5000,
+#            value = 1),
+shiny::numericInput("n","Anzahl von Exemplaren",1,min=1),
+
+shiny::numericInput("nq","Wieviele zufällig gezogene Fragen soll die Klausur enthalten (0=alle)",0,min=10),
+
+shiny::textAreaInput("preamble",label="Begrüßungstext",
+                     value=std_text,
+                     cols = 80, rows=5),
+
+shiny::actionButton(inputId = "do", label="Erstellen"),
+
+NULL)
+
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+
+    tags$head(tags$script(src = "message-handler.js")),
+
+    # Application title
+    titlePanel("Keira - (K)lausur (E)rstellen (i)st (R)ichtig (A)ngenehm"),
+
+    # Sidebar with a slider input for number of bins
+    #sidebarLayout(
+    #    sidebarPanel(
+           # shiny::h1("keira - K.lausuren E.rstellen I.st R.ichtig A.ngenehm"),
+
+
+    #    ),
+
+       #
+
+
+
+        # Show a plot of the generated distribution
+        mainPanel(
+          tabsetPanel(type = "tabs",
+                      tabPanel("(I) Erstellen",
+                               page1
+
+                               ),
+                      tabPanel("(II) Einlesen",
+
+                               fluidPage(
+
+                               shiny::h1("Einlesen")
+                               ,  shiny::fileInput("exam_file", "Gescannte Klausuren (als ZIP-Datei)"),
+                               shiny::actionButton(inputId = "do2", label="Einlesen"),
+
+                               )
+
+                               ),
+
+                      tabPanel("(III) Auswerten",
+                          fluidPage(
+                            shiny::h1("Auswerten"),
+                            shiny::fileInput("scanned_file", "Gescannte Klausuren aus Schritt II (als ZIP-Datei)"),
+                            shiny::fileInput("solution_file", "Datei mit korrekten Antworten (*.rds)"),
+                            shiny::actionButton(inputId = "do3", label="Bewerten")
+                            )
+                      )
+          )
+      #     plotOutput("distPlot")
+       )
+    )
+#)
+
+# Define server logic required to draw a histogram
+server <- function(input, output, session) {
+
+  observeEvent(input$do3, {
+    evaluate(scans=input$scanned_file$datapath, solutions=input$solution_file$datapath)
+  })
+
+
+  observeEvent(input$do2, {
+    grade(input$exam_file$datapath)
+  })
+
+  observeEvent(input$do, {
+   # session$sendCustomMessage(type = 'testmessage',
+      #                        message = 'Thank you for clicking')
+
+    # create files
+    #source("word_converter.R")
+    #system("RScript word_converter.R")
+    # --
+    print("Current path")
+    print(getwd())
+
+    print(input$docx_file)
+    converter(input$docx_file$datapath,subdir = "")
+    print("CONVERSION DONE")
+    files = list.files(path = "./",pattern = "*Rnw$")
+    print(files)
+
+    nq <- input$nq
+    if (nq < length(files) && nq>0) {
+      files = sample(files, size=nq, replace=FALSE)
+    }
+
+    generate(files = files, n=input$n, title=input$title, course = input$course,
+             showpoints = input$showpoints)
+
+  })
+
+    output$distPlot <- renderPlot({
+        # generate bins based on input$bins from ui.R
+        x    <- faithful[, 2]
+        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+
+        # draw the histogram with the specified number of bins
+        hist(x, breaks = bins, col = 'darkgray', border = 'white')
+    })
+}
+
+run <- function() {
+# Run the application
+shinyApp(ui = ui, server = server)
+}
+
+run()
