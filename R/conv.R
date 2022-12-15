@@ -114,6 +114,13 @@ for (i in 1:num_items) {
 
   current_item_text <- items[(i-1)*3+1][[1]]
 
+  # extract hash tags
+  tokens <- strsplit(current_item_text,"\\s+")[[1]]
+  regex <- "#[a-zA-Z:]+"
+  matches <- grep(regex, tokens, value = TRUE)
+  print(matches)
+
+
   # remove hash tags
   current_item_text <- gsub("#[[:alpha:]:]+", "", current_item_text)
 

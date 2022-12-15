@@ -33,11 +33,17 @@ shiny::fileInput("docx_file", "Klausur Word Dokument"),
 #            value = 1),
 shiny::numericInput("n","Anzahl von Exemplaren",1,min=1),
 
-shiny::numericInput("nq","Wieviele zufällig gezogene Fragen soll die Klausur enthalten (0=alle)",0,min=10),
+shiny::numericInput("nq",
+                    "Wieviele zufällig gezogene Fragen soll die Klausur enthalten (0=alle, aber höchstens 45)",0,
+                    min=10,max=45),
+
+shiny::numericInput("seed","Seed", value = round(runif(1,0,.Machine$integer.max)) ,min=1),
 
 shiny::textAreaInput("preamble",label="Begrüßungstext",
                      value=std_text,
                      cols = 80, rows=5),
+
+#shiny::textInput("hashtag_exclude","Ausschluss", value=""),
 
 shiny::actionButton(inputId = "do", label="Erstellen"),
 
@@ -113,9 +119,8 @@ server <- function(input, output, session) {
    # session$sendCustomMessage(type = 'testmessage',
       #                        message = 'Thank you for clicking')
 
-    # create files
-    #source("word_converter.R")
-    #system("RScript word_converter.R")
+    set.seed(input$seed)
+
     # --
     print("Current path")
     print(getwd())
@@ -129,6 +134,10 @@ server <- function(input, output, session) {
     nq <- input$nq
     if (nq < length(files) && nq>0) {
       files = sample(files, size=nq, replace=FALSE)
+    }
+
+    if (nq==0 && length(files)>45) {
+      files = sample(files, size=45, replace=FALSE)
     }
 
     generate(files = files, n=input$n, title=input$title, course = input$course,
