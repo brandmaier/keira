@@ -39,6 +39,10 @@ shiny::numericInput("nq",
 
 shiny::numericInput("seed","Seed", value = round(runif(1,0,.Machine$integer.max)) ,min=1),
 
+shiny::textInput("include_tags","Tags (Einschluss)", value=""),
+shiny::textInput("exclude_tags","Tags (Ausschluss)", value=""),
+
+
 shiny::textAreaInput("preamble",label="Begrüßungstext",
                      value=std_text,
                      cols = 80, rows=5),
@@ -125,8 +129,18 @@ server <- function(input, output, session) {
     print("Current path")
     print(getwd())
 
+    include_tags <- input$include_tags
+    exclude_tags <- input$exclude_tags
+
+    if (exclude_tags=="") exclude_tags <- c() else
+      exclude_tags = strsplit(exclude_tags,"\\s+")[[1]]
+    if (include_tags=="") include_tags <- c() else
+      include_tags = strsplit(include_tags,"\\s+")[[1]]
+
+    #browser()
+
     print(input$docx_file)
-    converter(input$docx_file$datapath,subdir = "")
+    converter(input$docx_file$datapath,subdir = "",include_tags, exclude_tags)
     print("CONVERSION DONE")
     files = list.files(path = "./",pattern = "*Rnw$")
     print(files)

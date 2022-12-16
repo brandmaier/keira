@@ -3,7 +3,9 @@ library(officer)
 library(tidyverse)
 library(stringr)
 
-converter <- function(input_file, subdir="temp/", debug=FALSE) {
+converter <- function(input_file, subdir="temp/", debug=FALSE,
+                      exclude_tags=c(),
+                      include_tags=c()) {
 
 doc <- officer::read_docx(input_file)
 
@@ -38,7 +40,27 @@ for (i in 1:num_elements) {
   if (level==1) {
     # store old question info
     if (i!=1) {
-      items <- append(items, list(current_item_text, current_item_answers, current_item_correct))
+      # check if question is valid
+
+      # extract hash tags
+      tokens <- strsplit(current_item_text,"\\s+")[[1]]
+      regex <- "#[a-zA-Z:]+"
+      matches <- grep(regex, tokens, value = TRUE)
+
+      # check exclusion criteria
+      skip_question <- any(matches %in% exclude_tags)
+
+      # check inclusion
+      if (!skip_question) {
+       if (length(include_tags)>0) {
+         skip_question <- !(any(matches %in% include_tags))
+       }
+      }
+
+      # add current question to pool
+      if (!skip_question)
+        items <- append(items, list(current_item_text, current_item_answers, current_item_correct))
+      # reset items
       current_item_answers <- c()
       current_item_correct <- -1
       current_answer_id <- 1
@@ -114,11 +136,6 @@ for (i in 1:num_items) {
 
   current_item_text <- items[(i-1)*3+1][[1]]
 
-  # extract hash tags
-  tokens <- strsplit(current_item_text,"\\s+")[[1]]
-  regex <- "#[a-zA-Z:]+"
-  matches <- grep(regex, tokens, value = TRUE)
-  print(matches)
 
 
   # remove hash tags
