@@ -98,6 +98,9 @@ ui <- fluidPage(
                             shiny::h1("Auswerten"),
                             shiny::fileInput("scanned_file", "Gescannte Klausuren aus Schritt II (als ZIP-Datei)"),
                             shiny::fileInput("solution_file", "Datei mit korrekten Antworten (*.rds)"),
+                            shiny::radioButtons(inputId="scoring_rule", label="Bewertungsfunktion",
+                                                choices=c("none","all","false","false2"),selected = "false"),
+                            shiny::checkboxInput(inputId="partial","Partielle Punkte", value=TRUE),
                             shiny::actionButton(inputId = "do3", label="Bewerten")
                             )
                       )
@@ -111,7 +114,10 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   observeEvent(input$do3, {
-    evaluate(scans=input$scanned_file$datapath, solutions=input$solution_file$datapath)
+    evaluate(scans=input$scanned_file$datapath,
+             solutions=input$solution_file$datapath,
+             partial=input$partial,
+             rule=input$scoring_rule)
   })
 
 
