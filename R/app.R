@@ -116,7 +116,7 @@ server <- function(input, output, session) {
 
 
   observeEvent(input$do2, {
-    grade(input$exam_file$datapath)
+    scanExam(input$exam_file$datapath)
   })
 
   observeEvent(input$do, {
@@ -158,7 +158,9 @@ server <- function(input, output, session) {
              showpoints = input$showpoints)
 
     # remove files
-    unlink("*\\.Rnw$")
+    #unlink("*\\.Rnw")
+
+    cat("Removed Rnw files")
 
   })
 
