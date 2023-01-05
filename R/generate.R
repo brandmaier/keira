@@ -1,3 +1,12 @@
+#'
+#'
+#' @param files
+#' @param n
+#' @param title
+#' @param name
+#'
+#'
+
 generate <- function(files, n = 1, title = "", name="keira-klausur", course="M99",
                      showpoints = TRUE) {
 
@@ -25,7 +34,7 @@ ex1 <- exams2nops(files, n = n,
                     "\\end{itemize}",
                     "\\vspace{0.5cm}"),sep="",collapse = ""),
                   verbose=FALSE,
-                  blank = 0, usepackage="color"
+                  blank = 0, usepackage=c("color")
 )
 
 

@@ -3,9 +3,18 @@ library(officer)
 library(tidyverse)
 library(stringr)
 
-converter <- function(input_file, subdir="temp/", debug=FALSE,
+#'
+#' Converts an item pool from Word to exams/LaTeX format
+#'
+#' @param exlude_tags
+#' @param include_tags
+#'
+#'
+converter <- function(input_file,
+                      subdir="temp/",
                       exclude_tags=c(),
-                      include_tags=c()) {
+                      include_tags=c(),
+                      debug=FALSE) {
 
 doc <- officer::read_docx(input_file)
 
@@ -24,7 +33,7 @@ items <- list()
 
 current_item_text <- ""
 current_item_answers <- c()
-current_item_correct <- -1
+current_item_correct <- c()
 current_answer_id <- 1
 current_mode <- "q"
 
@@ -44,7 +53,7 @@ for (i in 1:num_elements) {
 
       # extract hash tags
       tokens <- strsplit(current_item_text,"\\s+")[[1]]
-      regex <- "#[a-zA-Z:]+"
+      regex <- "#[[:alpha:]:]+"
       matches <- grep(regex, tokens, value = TRUE)
 
       # check exclusion criteria
@@ -62,7 +71,7 @@ for (i in 1:num_elements) {
         items <- append(items, list(current_item_text, current_item_answers, current_item_correct))
       # reset items
       current_item_answers <- c()
-      current_item_correct <- -1
+      current_item_correct <- c()
       current_answer_id <- 1
     }
     # new question
@@ -71,7 +80,7 @@ for (i in 1:num_elements) {
     answer <- cur_element$text
     answer <- trimws(answer, which="both")
     if (endsWith(answer, "(x)")) {
-      current_item_correct <- current_answer_id
+      current_item_correct <- c(current_item_correct, current_answer_id)
       answer <- substr(answer,0, nchar(answer)-3)
     }
     current_answer_id <- current_answer_id + 1
@@ -144,16 +153,18 @@ for (i in 1:num_items) {
 
   responses <- items[(i-1)*3+2][[1]]
   correct_response <- items[(i-1)*3+3][[1]]
+  if (is.null(correct_response)) {
+    stop(paste0("In item #", i,",Missing information about correct item (out of ",length(responses)," answers) for item: ",
+                current_item_text,"!"))
+  }
+
   exsolution <- rep(0,length(responses))
   exsolution[correct_response] <- 1
   exsolution <- paste0(exsolution,sep="",collapse="")
 
   exname <- paste0("Item",i,sep="",collapse="")
 
-  if (correct_response == -1) {
-    stop(paste0("In item #", i,",Missing information about correct item (out of ",length(responses)," answers) for item: ",
-                                          current_item_text,"!"))
-  }
+
 
   if (length(responses)==0) stop(paste0("Item #",i," has no responses: ",
                                         current_item_text,"!"))

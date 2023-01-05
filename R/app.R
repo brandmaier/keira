@@ -139,8 +139,8 @@ server <- function(input, output, session) {
 
     #browser()
 
-    print(input$docx_file)
-    converter(input$docx_file$datapath,subdir = "",include_tags, exclude_tags)
+    #print(input$docx_file)
+    converter(input$docx_file$datapath,subdir = "",include_tags=include_tags, exclude_tags=exclude_tags)
     print("CONVERSION DONE")
     files = list.files(path = "./",pattern = "*Rnw$")
     print(files)
@@ -156,6 +156,9 @@ server <- function(input, output, session) {
 
     generate(files = files, n=input$n, title=input$title, course = input$course,
              showpoints = input$showpoints)
+
+    # remove files
+    unlink("*\\.Rnw$")
 
   })
 
