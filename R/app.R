@@ -99,7 +99,7 @@ ui <- fluidPage(
                             shiny::fileInput("scanned_file", "Gescannte Klausuren aus Schritt II (als ZIP-Datei)"),
                             shiny::fileInput("solution_file", "Datei mit korrekten Antworten (*.rds)"),
                             shiny::radioButtons(inputId="scoring_rule", label="Bewertungsfunktion",
-                                                choices=c("none","all","false","false2"),selected = "false"),
+                                                choices=c("none","all","false","false2","simple"),selected = "false"),
                             shiny::checkboxInput(inputId="partial","Partielle Punkte", value=TRUE),
                             shiny::actionButton(inputId = "do3", label="Bewerten")
                             )
