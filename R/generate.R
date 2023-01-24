@@ -8,13 +8,24 @@
 #'
 
 generate <- function(files, n = 1, title = "", name="keira-klausur", course="M99",
-                     showpoints = TRUE, points = NULL) {
+                     showpoints = TRUE, intro = "(default)", points = NULL) {
 
 if (is.null(points)) {
   points <- rep(1, length(files))
 }
 
-ex1 <- exams2nops(files, n = n,
+  if (intro=="") {
+    intro <- paste0(c(
+      "Hinweise: \\\\",
+      "\\begin{itemize}",
+      "\\item Die Klausur besteht aus ",length(files)," geschlossenen Fragen mit vorgegebenen Antwortm\\\"oglichkeiten (jeweils eine Antwort ist richtig) ",
+      "\\item Bitte pr\\\"ufen Sie vor der Abgabe, dass Sie alle Fragen auf dem Deckblatt beantwortet haben. Nur die Antworten auf dem Deckblatt werden ber\\\"ucksichtigt.",
+      "\\item Viel Erfolg!",
+      "\\end{itemize}",
+      "\\vspace{0.5cm}"))
+  }
+
+ex1 <- examsMSB::exams2nops(files, n = n,
                   dir = "demo_nops_pdf", name = name,
                   #date = "2022-02-29",
                   points = points, # Immer 1 Punkt pro MC-Frage
@@ -28,14 +39,8 @@ ex1 <- exams2nops(files, n = n,
                   logo = "C:/Users/andreas.brandmaier/Documents/msblogo.png",
                   title = title,
                   twocolumn = FALSE,   # Die Fragen werden in einer einzigen Spalte arrangiert
-                  intro = paste0(c(
-                    "Hinweise: \\\\",
-                    "\\begin{itemize}",
-                    "\\item Die Klausur besteht aus ",length(files)," geschlossenen Fragen mit vorgegebenen Antwortm\\\"oglichkeiten (jeweils eine Antwort ist richtig) ",
-                    "\\item Bitte pr\\\"ufen Sie vor der Abgabe, dass Sie alle Fragen auf dem Deckblatt beantwortet haben. Nur die Antworten auf dem Deckblatt werden ber\\\"ucksichtigt.",
-                    "\\item Viel Erfolg!",
-                    "\\end{itemize}",
-                    "\\vspace{0.5cm}"),sep="",collapse = ""),
+                  intro = intro,
+                  sep="",collapse = ""),
                   verbose=FALSE,
                   blank = 0, usepackage=c("color")
 )

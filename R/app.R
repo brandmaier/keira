@@ -11,13 +11,7 @@
 library(shiny)
 library(exams)
 
-std_text =  paste0("Hinweise: \\\\",
-"\\begin{itemize}",
-"\\item Die Klausur besteht aus 3 geschlossenen Fragen mit vorgegebenen Antwortm\\\"oglichkeiten (jeweils eine Antwort ist richtig) ",
-"\\item Bitte pr\\\"ufen Sie vor der Abgabe, dass Sie alle Fragen auf dem Deckblatt beantwortet haben. Nur die Antworten auf dem Deckblatt werden ber\\\"ucksichtigt.",
-"\\item Viel Erfolg!",
-"\\end{itemize}",
-"\\vspace{0.5cm}", sep="", collapse="")
+std_text =  "(default)"
 
 
 page1 <- fluidPage(
@@ -182,7 +176,7 @@ server <- function(input, output, session) {
 
 run <- function() {
 # Run the application
-shinyApp(ui = ui, server = server)
+shiny::shinyApp(ui = ui, server = server)
 }
 
 run()

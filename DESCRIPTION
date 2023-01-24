@@ -9,7 +9,7 @@ Description: More about what it does (maybe more than one line)
 License: proprietary
 Encoding: UTF-8
 LazyData: true
-Imports: officer,
+Requires: officer,
   tidyverse,
   stringr,
   shiny,
