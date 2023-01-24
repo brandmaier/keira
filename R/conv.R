@@ -125,9 +125,15 @@ converter <- function(input_file,
     x <- stringr::str_replace_all(x, "ü", "\\\\\\\\\"u")
     x <- stringr::str_replace_all(x, "ß", "{\\\\\\\\ss}")
     x <- stringr::str_replace_all(x, "%", "{\\\\\\\\%}")
-    x <- stringr::str_replace_all(x, "#", "{\\\\\\\\#}")
+    #x <- stringr::str_replace_all(x, "#", "{\\\\\\\\#}")
     #x <- stringr::str_replace_all(x, "$", "{\\\\\\\\$}")
     x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
+    x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
+    x <- stringr::str_replace_all(x, "…", "$\\\\\\\\ldots$")
+    x <- stringr::str_replace_all(x, "„", "{\\\\\\\\glqq}")
+    x <- stringr::str_replace_all(x, "“", "\\\\\\\\grqq{}")
+    #str.decode("utf-8").replace(u"\u2022", "*")
+
     x
   }
 
