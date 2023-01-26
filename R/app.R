@@ -33,9 +33,12 @@ shiny::numericInput("nq",
 
 shiny::numericInput("seed","Seed", value = round(runif(1,0,.Machine$integer.max)) ,min=1),
 
+shiny::numericInput("points", "Punkte pro Frage",value=1, min=0),
+
 shiny::textInput("include_tags","Tags (Einschluss)", value=""),
 shiny::textInput("exclude_tags","Tags (Ausschluss)", value=""),
 
+shiny::checkboxInput("shuffle", "Reihenfolge verwürfeln",value = TRUE),
 
 shiny::textAreaInput("preamble",label="Begrüßungstext",
                      value=std_text,
@@ -138,6 +141,7 @@ server <- function(input, output, session) {
       include_tags = strsplit(include_tags,"\\s+")[[1]]
 
     #browser()
+    points <- input$points
 
     #print(input$docx_file)
     converter(input$docx_file$datapath,subdir = "",include_tags=include_tags, exclude_tags=exclude_tags)
@@ -148,14 +152,27 @@ server <- function(input, output, session) {
     nq <- input$nq
     if (nq < length(files) && nq>0) {
       files = sample(files, size=nq, replace=FALSE)
+
+      if (!input$shuffle) {
+        files = sort(files, decreasing = FALSE)
+      } else {
+        # PASS
+      }
     }
 
     if (nq==0 && length(files)>45) {
+
       files = sample(files, size=45, replace=FALSE)
+
+      if (!input$shuffle) {
+        files = sort(files, decreasing = FALSE)
+      } else {
+        # PASS
+      }
     }
 
     generate(files = files, n=input$n, title=input$title, course = input$course,
-             showpoints = input$showpoints)
+             showpoints = input$showpoints, points=points)
 
     # remove files
     #unlink("*\\.Rnw")

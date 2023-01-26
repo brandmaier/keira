@@ -14,7 +14,7 @@ if (is.null(points)) {
   points <- rep(1, length(files))
 }
 
-  if (intro=="") {
+  if (intro=="(default)") {
     intro <- paste0(c(
       "Hinweise: \\\\",
       "\\begin{itemize}",
@@ -40,7 +40,7 @@ ex1 <- examsMSB::exams2nops(files, n = n,
                   title = title,
                   twocolumn = FALSE,   # Die Fragen werden in einer einzigen Spalte arrangiert
                   intro = intro,
-                  sep="",collapse = ""),
+                  #sep="",collapse = ""),
                   verbose=FALSE,
                   blank = 0, usepackage=c("color")
 )

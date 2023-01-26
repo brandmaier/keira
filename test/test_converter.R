@@ -25,4 +25,4 @@ nops_eval(solutions = "demo_nops_pdf/keira-klausur.rds",
           scans = "temp_nops_scan/output.zip",register = NULL)
 
 
-converter("~/../Desktop/Klausurfragen_Merkl-MassmannWS2022_2023.docx")
+converter("~/../Desktop/Klausurfragen_Merkl-MassmannWS2022_2023_mit ListenabsatzKORR_ab.docx",debug = TRUE)

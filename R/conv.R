@@ -69,7 +69,7 @@ converter <- function(input_file,
 
         # extract hash tags
         tokens <- strsplit(current_item_text, "\\s+")[[1]]
-        regex <- "#[[:alpha:]:]+"
+        regex <- "#[[:alpha:]:\\.]+"
         matches <- grep(regex, tokens, value = TRUE)
 
         # check exclusion criteria
@@ -93,6 +93,10 @@ converter <- function(input_file,
               current_item_correct
             )
           )
+        if (debug) {
+          if (is.null(current_item_answers)) { cat("\n/!\\n") }
+          cat("------\n")
+        }
         # reset items
         current_item_answers <- c()
         current_item_correct <- c()
@@ -103,7 +107,7 @@ converter <- function(input_file,
     } else if (level == 2) {
       answer <- cur_element$text
       answer <- trimws(answer, which = "both")
-      if (endsWith(answer, "(x)")) {
+      if (endsWith(answer, "(x)") || endsWith(answer, "(X)")) {
         current_item_correct <- c(current_item_correct, current_answer_id)
         answer <- substr(answer, 0, nchar(answer) - 3)
       }
@@ -128,10 +132,12 @@ converter <- function(input_file,
     #x <- stringr::str_replace_all(x, "#", "{\\\\\\\\#}")
     #x <- stringr::str_replace_all(x, "$", "{\\\\\\\\$}")
     x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
-    x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
+    #x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
     x <- stringr::str_replace_all(x, "…", "$\\\\\\\\ldots$")
     x <- stringr::str_replace_all(x, "„", "{\\\\\\\\glqq}")
     x <- stringr::str_replace_all(x, "“", "\\\\\\\\grqq{}")
+    x <- stringr::str_replace_all(x, "’","'")
+    x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u00A0"),"\\\\\\\\,") # non-breaking space U+00A0
     #str.decode("utf-8").replace(u"\u2022", "*")
 
     x
@@ -160,7 +166,7 @@ ANSWERS
 \\end{question}
 
 \\exname{EXNAME}
-\\extype{mchoice}
+\\extype{EXTYPE}
 \\exsolution{EXSOLUTION}
 \\exshuffle{EXSHUFFLE}
 "
@@ -187,10 +193,10 @@ ANSWERS
 
     current_item_text <- items[(i - 1) * 3 + 1][[1]]
 
-
+    # get hash tags
 
     # remove hash tags
-    current_item_text <- gsub("#[[:alpha:]:]+", "", current_item_text)
+    current_item_text <- gsub("#[[:alpha:]:\\.]+", "", current_item_text)
 
 
     responses <- items[(i - 1) * 3 + 2][[1]]
@@ -226,6 +232,26 @@ ANSWERS
       rsp <- paste0(rsp, "\\\\item ", convert_latex(responses[j]), "\n")
     }
 
+    # extract hash tags
+    tokens <- strsplit(current_item_text, "\\s+")[[1]]
+    regex <- "#[[:alpha:]:\\.]+"
+    matches <- grep(regex, tokens, value = TRUE)
+
+
+    # type inference
+    extype <- "schoice"
+    if (any(matches %in% "#mchoice")) {
+      extype <- "mchoice"
+    } else if ((any(matches %in% "#schoice"))) {
+      extype <- "schoice"
+    } else {
+      if (length(correct_response)==1) {
+        extype <- "schoice"
+      } else {
+        extype <- "mchoice"
+      }
+    }
+
     cur_file <-
       stringr::str_replace(cur_file, "ITEM_TEXT", convert_latex(current_item_text))
     cur_file <-
@@ -234,9 +260,11 @@ ANSWERS
     cur_file <-
       stringr::str_replace(cur_file, "EXSHUFFLE", as.character(length(responses)))
     cur_file <- stringr::str_replace(cur_file, "EXNAME", exname)
+    cur_file <- stringr::str_replace(cur_file, "EXTYPE", extype)
 
+    fullnr <- paste0(paste0(rep(0,max(0,3-nchar(i))),collapse=""),i,collapse="")
 
-    writeLines(cur_file, paste0(subdir, "item", i, ".Rnw"))
+    writeLines(cur_file, paste0(subdir, "item", fullnr, ".Rnw"))
   }
 
 }
