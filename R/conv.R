@@ -15,7 +15,9 @@ converter <- function(input_file,
                       subdir = "temp/",
                       exclude_tags = c(),
                       include_tags = c(),
-                      debug = FALSE) {
+                      debug = FALSE,
+                      file_prefix="item",
+                      add_mchoice_instruction=FALSE) {
   doc <- officer::read_docx(input_file)
 
   content <- doc %>% officer::docx_summary()
@@ -69,7 +71,7 @@ converter <- function(input_file,
 
         # extract hash tags
         tokens <- strsplit(current_item_text, "\\s+")[[1]]
-        regex <- "#[[:alpha:]:\\.]+"
+        regex <- "#[[:alnum:]:\\.]+"
         matches <- grep(regex, tokens, value = TRUE)
 
         # check exclusion criteria
@@ -94,7 +96,10 @@ converter <- function(input_file,
             )
           )
         if (debug) {
-          if (is.null(current_item_answers)) { cat("\n/!\\n") }
+          cat("--> Adding question with ", length(current_item_answers)," answers.\n")
+        }
+        if (debug) {
+          if (is.null(current_item_answers)) { cat("\n\n/!\ Achtung: Keine Antworten gefunden!\n") }
           cat("------\n")
         }
         # reset items
@@ -136,15 +141,31 @@ converter <- function(input_file,
     x <- stringr::str_replace_all(x, "…", "$\\\\\\\\ldots$")
     x <- stringr::str_replace_all(x, "„", "{\\\\\\\\glqq}")
     x <- stringr::str_replace_all(x, "“", "\\\\\\\\grqq{}")
+    x <- stringr::str_replace_all(x, "”", "\\\\\\\\grqq{}")
     x <- stringr::str_replace_all(x, "’","'")
     x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u00A0"),"\\\\\\\\,") # non-breaking space U+00A0
-    #str.decode("utf-8").replace(u"\u2022", "*")
+    x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u0094"),"\\\\\\\\grqq{}")
+        #str.decode("utf-8").replace(u"\u2022", "*")
 
     x
   }
 
   # add last item
   #items <- c(items, list(current_item_text, current_item_answers, current_item_correct))
+  # check exclusion criteria
+  # extract hash tags
+  tokens <- strsplit(current_item_text, "\\s+")[[1]]
+  regex <- "#[[:alnum:]:\\.]+"
+  matches <- grep(regex, tokens, value = TRUE)
+  skip_question <- any(matches %in% exclude_tags)
+
+  # check inclusion
+  if (!skip_question) {
+    if (length(include_tags) > 0) {
+      skip_question <- !(any(matches %in% include_tags))
+    }
+  }
+  if (!skip_question) {
   items <-
     append(items,
            list(
@@ -152,7 +173,7 @@ converter <- function(input_file,
              current_item_answers,
              current_item_correct
            ))
-
+  }
 
   # write files
 
@@ -196,7 +217,7 @@ ANSWERS
     # get hash tags
 
     # remove hash tags
-    current_item_text <- gsub("#[[:alpha:]:\\.]+", "", current_item_text)
+    current_item_text <- gsub("#[[:alnum:]:\\.]+", "", current_item_text)
 
 
     responses <- items[(i - 1) * 3 + 2][[1]]
@@ -234,7 +255,7 @@ ANSWERS
 
     # extract hash tags
     tokens <- strsplit(current_item_text, "\\s+")[[1]]
-    regex <- "#[[:alpha:]:\\.]+"
+    regex <- "#[[:alnum:]:\\.]+"
     matches <- grep(regex, tokens, value = TRUE)
 
 
@@ -252,6 +273,12 @@ ANSWERS
       }
     }
 
+    if (extype=="mchoice") {
+      if (add_mchoice_instruction) {
+        current_item_text <- paste0(current_item_text,"\\\\newline","\\\\emph{Mehrere Antworten können korrekt sein.}")
+      }
+    }
+
     cur_file <-
       stringr::str_replace(cur_file, "ITEM_TEXT", convert_latex(current_item_text))
     cur_file <-
@@ -264,7 +291,7 @@ ANSWERS
 
     fullnr <- paste0(paste0(rep(0,max(0,3-nchar(i))),collapse=""),i,collapse="")
 
-    writeLines(cur_file, paste0(subdir, "item", fullnr, ".Rnw"))
+    writeLines(cur_file, paste0(subdir, file_prefix, fullnr, ".Rnw"))
   }
 
 }
