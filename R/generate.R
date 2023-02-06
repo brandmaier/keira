@@ -7,12 +7,21 @@
 #'
 #'
 
-generate <- function(files, n = 1, title = "", name="keira-klausur", course="M99",
-                     showpoints = TRUE, intro = "(default)", points = NULL) {
+generate <- function(files, n = 1, title = "", name="", course="M99",
+                     showpoints = TRUE, intro = "(default)", points = NULL,
+                     date = NULL) {
 
 if (is.null(points)) {
   points <- rep(1, length(files))
 }
+
+  if (is.null(date)) {
+    date <- Sys.Date()
+  }
+
+  if (name=="") {
+    name <- paste0("klausur_",course,"_",date,sep="",collapse="")
+  }
 
   if (intro=="(default)") {
     intro <- paste0(c(
@@ -26,6 +35,7 @@ if (is.null(points)) {
   }
 
 ex1 <- examsMSB::exams2nops(files, n = n,
+                  date = date,
                   dir = "demo_nops_pdf", name = name,
                   #date = "2022-02-29",
                   points = points, # Immer 1 Punkt pro MC-Frage

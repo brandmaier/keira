@@ -5,6 +5,34 @@ library(tidyverse)
 library(stringr)
 
 #'
+#'
+#' @export
+convert_latex <- function(x) {
+  x <- stringr::str_replace_all(x, "Ä", "\\\\\\\\\"A")
+  x <- stringr::str_replace_all(x, "Ö", "\\\\\\\\\"O")
+  x <- stringr::str_replace_all(x, "Ü", "\\\\\\\\\"U")
+  x <- stringr::str_replace_all(x, "ä", "\\\\\\\\\"a")
+  x <- stringr::str_replace_all(x, "ö", "\\\\\\\\\"o")
+  x <- stringr::str_replace_all(x, "ü", "\\\\\\\\\"u")
+  x <- stringr::str_replace_all(x, "ß", "{\\\\\\\\ss}")
+  x <- stringr::str_replace_all(x, "%", "{\\\\\\\\%}")
+  #x <- stringr::str_replace_all(x, "#", "{\\\\\\\\#}")
+  #x <- stringr::str_replace_all(x, "$", "{\\\\\\\\$}")
+  x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
+  #x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
+  x <- stringr::str_replace_all(x, "…", "$\\\\\\\\ldots$")
+  x <- stringr::str_replace_all(x, "„", "{\\\\\\\\glqq}")
+  x <- stringr::str_replace_all(x, "“", "\\\\\\\\grqq{}")
+  x <- stringr::str_replace_all(x, "”", "\\\\\\\\grqq{}")
+  x <- stringr::str_replace_all(x, "’","'")
+  x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u00A0"),"\\\\\\\\,") # non-breaking space U+00A0
+  x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u0094"),"\\\\\\\\grqq{}")
+  #str.decode("utf-8").replace(u"\u2022", "*")
+
+  x
+}
+
+#'
 #' Converts an item pool from Word to exams/LaTeX format
 #'
 #' @param exlude_tags
@@ -125,30 +153,7 @@ converter <- function(input_file,
 
   }
 
-  convert_latex <- function(x) {
-    x <- stringr::str_replace_all(x, "Ä", "\\\\\\\\\"A")
-    x <- stringr::str_replace_all(x, "Ö", "\\\\\\\\\"O")
-    x <- stringr::str_replace_all(x, "Ü", "\\\\\\\\\"U")
-    x <- stringr::str_replace_all(x, "ä", "\\\\\\\\\"a")
-    x <- stringr::str_replace_all(x, "ö", "\\\\\\\\\"o")
-    x <- stringr::str_replace_all(x, "ü", "\\\\\\\\\"u")
-    x <- stringr::str_replace_all(x, "ß", "{\\\\\\\\ss}")
-    x <- stringr::str_replace_all(x, "%", "{\\\\\\\\%}")
-    #x <- stringr::str_replace_all(x, "#", "{\\\\\\\\#}")
-    #x <- stringr::str_replace_all(x, "$", "{\\\\\\\\$}")
-    x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
-    #x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
-    x <- stringr::str_replace_all(x, "…", "$\\\\\\\\ldots$")
-    x <- stringr::str_replace_all(x, "„", "{\\\\\\\\glqq}")
-    x <- stringr::str_replace_all(x, "“", "\\\\\\\\grqq{}")
-    x <- stringr::str_replace_all(x, "”", "\\\\\\\\grqq{}")
-    x <- stringr::str_replace_all(x, "’","'")
-    x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u00A0"),"\\\\\\\\,") # non-breaking space U+00A0
-    x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u0094"),"\\\\\\\\grqq{}")
-        #str.decode("utf-8").replace(u"\u2022", "*")
 
-    x
-  }
 
   # add last item
   #items <- c(items, list(current_item_text, current_item_answers, current_item_correct))
