@@ -4,6 +4,18 @@ library(officer)
 library(tidyverse)
 library(stringr)
 
+
+
+convert_latex_simple <- function(x) {
+  x <- stringr::str_replace_all(x, "Ä", "\\\"A")
+  x <- stringr::str_replace_all(x, "Ö", "\\\"O")
+  x <- stringr::str_replace_all(x, "Ü", "\\\"U")
+  x <- stringr::str_replace_all(x, "ä", "\\\"a")
+  x <- stringr::str_replace_all(x, "ö", "\\\"o")
+  x <- stringr::str_replace_all(x, "ü", "\\\"u")
+  x <- stringr::str_replace_all(x, "ß", "{\\ss}")
+  x
+}
 #'
 #'
 #' @export

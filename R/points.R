@@ -5,6 +5,11 @@ extract_points <- function(files, schoice=1, mchoice=2) {
   })
 }
 
+extract_number <- function(string) {
+  number <- gsub("[^0-9.]", "", string)
+  as.numeric(number)
+}
+
 infer_points <- function(ll, schoice, mchoice) {
   #browser()
   cmpexp <- startsWith(ll, "\\expoints")
@@ -25,7 +30,7 @@ infer_points <- function(ll, schoice, mchoice) {
     # read out points
     if (sum(cmpexp)>1) stop("Error: Multiple expoints given!")
     exl <- ll[cmpexp]
-    p <- 1
+    p <- extract_points(exl)
   }
   return(p)
 }
