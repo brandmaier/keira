@@ -1,73 +1,94 @@
-#
-# grade report
-#
-path <- "processing/nops_scan_20230321153245/"
-outfolder <- "reports/"
-yoffset <- 0
-xoffset <- 0
-evalcsv <- read.csv("nops_eval.csv", sep=";",colClasses = "character")
+#'
+#' grade report generator
+#'
+#' @export
 
-nexams <- nrow(evalcsv)
+grade_report <- function(path = "",
+                         outfolder = "reports/",
+                         debug = FALSE) {
 
-#nexams <- 20
+  yoffset = 0
+  xoffset = 0
 
+  if (!dir.exists(outfolder)) {
+    dir.create(outfolder)
+  }
 
-hatch <- function(x1, y1, x2, y2, lwd=8, col=RED)
-{
-  y1 <- pixelheight - y1
-  y2 <- pixelheight - y2
-  lines( c(x1,x2),c(y1,y2), lwd=8, col=col)
-  lines( c(x1,x2),c(y2,y1), lwd=8, col=col)
-}
+  evalcsv <- read.csv("nops_eval.csv", sep=";",colClasses = "character")
 
-myrect <- function(x1, y1, x2, y2, lwd=2, col="red") {
+  nexams <- nrow(evalcsv)
 
-  #cat("Coords:", x1,pixelheight-y2,x2,pixelheight-y1,"\n")
-  graphics::rect(x1,pixelheight-y2,x2,pixelheight-y1,lwd=10,border=col)
-}
-
-for (i in 1:nexams) {
-
-  id <- evalcsv$registration[i]
-  as.character(id)
-
-  fname <- evalcsv$scan[i]
-
-  x <- png::readPNG(paste0(path,"/",fname,sep="",collapse=""))
-
-  pixelwidth<- dim(x)[2]
-  pixelheight <- dim(x)[1]
-
-  outfile <- paste0(outfolder,"/",evalcsv$registration[i],".png",sep="",collapse = "")
-  png(outfile,width = ncol(x),height=nrow(x))
-  plot(1, type="n", xlim=c(0, ncol(x)), ylim=c(0, nrow(x)), axes=FALSE, frame.plot=FALSE)
-  rasterImage(x, 0, 0, ncol(x), nrow(x))
-
-  text(200,3300, labels=paste0("Note: ",evalcsv$mark[i]),cex=5,col="red")
-  text(200,3400, labels=paste0("Punkte: ",round(as.numeric(evalcsv$points[i]))),cex=5,col="red")
-
-  startpos <- c( 330,1840) / c(2480, 3507)
-  incx <- (420-330) / 2480
-  incy <- (1920-1840) /3507
-
-  extragapy <- (2700-2590 - 60-20) / 3507
-  gapx1 <- c(1050-324) / 2480  # old between 1 and 2
-  gapx2 <- (1730-1050) / 2480
+  pb <- utils::txtProgressBar(max=nexams, style=2)
 
 
-  RED <- "red"
-    GREEN <- "green"
+  # graphics helper function
+  hatch <- function(x1, y1, x2, y2, lwd=8, col=RED)
+  {
+    y1 <- pixelheight - y1
+    y2 <- pixelheight - y2
+    lines( c(x1,x2),c(y1,y2), lwd=8, col=col)
+    lines( c(x1,x2),c(y2,y1), lwd=8, col=col)
+  }
+
+  # graphics helper function
+  myrect <- function(x1, y1, x2, y2, lwd=2, col="red") {
+
+    #cat("Coords:", x1,pixelheight-y2,x2,pixelheight-y1,"\n")
+    graphics::rect(x1,pixelheight-y2,x2,pixelheight-y1,lwd=10,border=col)
+  }
+
+  for (i in 1:nexams) {
+
+    id <- evalcsv$registration[i]
+    as.character(id)
+
+    fname <- evalcsv$scan[i]
+
+    on.exit({dev.off()})
+    x <- png::readPNG(paste0(path,"/",fname,sep="",collapse=""))
+
+    pixelwidth<- dim(x)[2]
+    pixelheight <- dim(x)[1]
+
+    outfile <- paste0(outfolder,"/",evalcsv$registration[i],".png",sep="",collapse = "")
+    png(outfile,width = ncol(x),height=nrow(x))
+    plot(1, type="n", xlim=c(0, ncol(x)), ylim=c(0, nrow(x)), axes=FALSE, frame.plot=FALSE)
+    rasterImage(x, 0, 0, ncol(x), nrow(x))
+
+    text(200,3300, labels=paste0("Note: ",evalcsv$mark[i]),cex=5,col="red")
+    text(200,3400, labels=paste0("Punkte: ",round(as.numeric(evalcsv$points[i]))),cex=5,col="red")
+
+    startpos <- c( 330,1840) / c(2480, 3507)
+    incx <- (420-330) / 2480
+    incy <- (1920-1840) /3507
+
+    extragapy <- (2700-2590 - 60-20) / 3507
+    gapx1 <- c(1050-324) / 2480  # old between 1 and 2
+    gapx2 <- (1730-1050) / 2480
+
 
     # find fixation cross
-    searchwindow_topleft_mark <- x[200:500, 0:500,1]
-    #image(searchwindow_topleft_mark)
-    rowmin <- which.min( (apply(searchwindow_topleft_mark, 1, mean)-0.6)^2 )  # Zeile
-    colmin <- which.min( (apply(searchwindow_topleft_mark, 2, mean)-0.85)^2)  # Spalte
+    window_height <- 100 # from 100 to 300
+    found <- FALSE
+    while (!found && window_height <= 300) {
+      searchwindow_topleft_mark <- x[200:(200+window_height), 0:500,1]
+      #image(searchwindow_topleft_mark)
+      rowmin <- which.min( (apply(searchwindow_topleft_mark, 1, mean)-0.9)^2 )  # Zeile
+      colmin <- which.min( (apply(searchwindow_topleft_mark, 2, mean)-0.85)^2)  # Spalte
+      window_height = window_height + 100
 
+      minvalrow <- min((apply(searchwindow_topleft_mark, 1, mean)))
+      if (minvalrow < 0.99) found <- TRUE
+    }
 
-    cat("Crosshair #",i,"(",evalcsv$registration[i],"): ",colmin,", ",rowmin,"\n")
-    myrect(x1=colmin-20, y1=200+rowmin-20,x2=colmin+20, y2=200+rowmin+20, lwd=3, col = "blue")
-    myrect(x1=0,x2=500,y1=200,y2=500,lwd=1,col="blue")
+    if (debug) {
+      cat("Crosshair #",i,"(",evalcsv$registration[i],"): ",colmin,", ",rowmin,"\n")
+      myrect(x1=colmin-20, y1=200+rowmin-20,x2=colmin+20, y2=200+rowmin+20, lwd=3, col = "blue")
+      myrect(x1=0,x2=500,y1=200,y2=500,lwd=1,col="blue")
+    }
+
+    yoffset <- (rowmin-62)
+    #xoffset <- (colmin-395)
 
     resizer <- c(pixelwidth, pixelheight)
 
@@ -99,21 +120,21 @@ for (i in 1:nexams) {
         # correct checkmark -> green box
         if (answer==solution && answer=="1") {
           #cat(" |- Correct answer at ",k," drawing at",pos_x,",",pos_y,"\n")
-          myrect(pos_x, pos_y, pos_x+box_width, pos_y+box_height, col=GREEN)
+          myrect(pos_x, pos_y, pos_x+box_width, pos_y+box_height, col="green")
         }
 
         # wrong checkmark -> red hatch
         if (answer=="1" && solution=="0")
         {
           #cat(" |- Wrong answer at ",k," drawing at",pos_x,",",pos_y,"\n")
-          myrect(pos_x, pos_y, pos_x+box_width, pos_y+box_height, col=RED)
+          myrect(pos_x, pos_y, pos_x+box_width, pos_y+box_height, col="red")
         }
 
         # missed solution
         if (solution == "1" && answer=="0")
         {
           #cat(" |- Missed answer at ",k," drawing at",pos_x,",",pos_y,"\n")
-          hatch(pos_x, pos_y, pos_x+box_width, pos_y+box_height, col=RED)
+          hatch(pos_x, pos_y, pos_x+box_width, pos_y+box_height, col="red")
         }
 
       }
@@ -123,5 +144,10 @@ for (i in 1:nexams) {
 
 
     dev.off()
+
+    setTxtProgressBar(pb, i)
+
+  }
+
 
 }
