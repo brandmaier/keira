@@ -96,7 +96,7 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
     rasterImage(x, 0, 0, ncol(x), nrow(x))
 
     text(200,3300, labels=paste0("Note: ",evalcsv$mark[i]),cex=5,col="red")
-    text(200,3400, labels=paste0("Punkte: ",round(as.numeric(evalcsv$points[i])),2),cex=5,col="red")
+    text(200,3400, labels=paste0("Punkte: ",round(as.numeric(evalcsv$points[i]),2)),cex=5,col="red")
 
     startpos <- c( 330,1840) / c(2480, 3507)
     incx <- (420-330) / 2480
