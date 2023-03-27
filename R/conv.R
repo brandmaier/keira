@@ -232,6 +232,9 @@ ANSWERS
     current_item_text <- items[(i - 1) * 3 + 1][[1]]
 
     # get hash tags
+    tokens <- strsplit(current_item_text, "\\s+")[[1]]
+    regex <- "#[[:alnum:]:\\.]+"
+    matches <- grep(regex, tokens, value = TRUE)
 
     # remove hash tags
     current_item_text <- gsub("#[[:alnum:]:\\.]+", "", current_item_text)
@@ -270,11 +273,9 @@ ANSWERS
       rsp <- paste0(rsp, "\\\\item ", convert_latex(responses[j]), "\n")
     }
 
-    # extract hash tags
-    tokens <- strsplit(current_item_text, "\\s+")[[1]]
-    regex <- "#[[:alnum:]:\\.]+"
-    matches <- grep(regex, tokens, value = TRUE)
 
+    #matches <-
+    #browser()
 
     # type inference
     extype <- "schoice"

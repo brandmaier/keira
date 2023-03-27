@@ -9,14 +9,23 @@
 
 generate <- function(files, n = 1, title = "", name="", course="M99",
                      showpoints = TRUE, intro = "(default)", points = NULL,
-                     date = NULL) {
+                     date = NULL, solution = FALSE, logo=NULL,
+                     institution=NULL) {
 
 if (is.null(points)) {
   points <- rep(1, length(files))
 }
 
+if (is.null(logo)) {
+  logo<-"C:/Users/andreas.brandmaier/Documents/msblogo.png"
+}
+
   if (is.null(date)) {
     date <- Sys.Date()
+  }
+
+  if (is.null(institution)) {
+    institution <- "MSB Medical School Berlin"
   }
 
   if (name=="") {
@@ -42,17 +51,18 @@ ex1 <- examsMSB::exams2nops(files, n = n,
                   showpoints = showpoints,
                   samepage = TRUE, # questions should stay on the same page
                   duplex = FALSE,language = "de",
-                  institution = "MSB Medical School Berlin",
+                  institution = institution,
                   #title = "",
                   course = course,
                   reglength = 12, # Laenge der Matrikelnummer
-                  logo = "C:/Users/andreas.brandmaier/Documents/msblogo.png",
+                  logo = logo,
                   title = title,
                   twocolumn = FALSE,   # Die Fragen werden in einer einzigen Spalte arrangiert
                   intro = intro,
                   #sep="",collapse = ""),
                   verbose=FALSE,
-                  blank = 0, usepackage=c("color")
+                  blank = 0, usepackage=c("color"),
+                  solution = solution
 )
 
 
