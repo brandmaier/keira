@@ -52,12 +52,13 @@ convert_latex <- function(x) {
 #'
 #'
 converter <- function(input_file,
-                      subdir = "temp/",
+                      output_directory = "items/",
                       exclude_tags = c(),
                       include_tags = c(),
                       debug = FALSE,
                       file_prefix="item",
                       add_mchoice_instruction=FALSE) {
+
   doc <- officer::read_docx(input_file)
 
   content <- doc %>% officer::docx_summary()
@@ -209,7 +210,7 @@ ANSWERS
 \\exshuffle{EXSHUFFLE}
 "
 
-  print(subdir)
+  subdir <- output_directory
 
   if (subdir != "") {
     if (!dir.exists(subdir))
@@ -273,9 +274,6 @@ ANSWERS
       rsp <- paste0(rsp, "\\\\item ", convert_latex(responses[j]), "\n")
     }
 
-
-    #matches <-
-    #browser()
 
     # type inference
     extype <- "schoice"

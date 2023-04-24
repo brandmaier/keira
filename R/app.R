@@ -98,6 +98,13 @@ ui <- fluidPage(
                             shiny::radioButtons(inputId="scoring_rule", label="Bewertungsfunktion",
                                                 choices=c("none","all","false","false2","simple"),selected = "false"),
                             shiny::checkboxInput(inputId="partial","Partielle Punkte", value=TRUE),
+
+                            shiny::helpText("Folgende Optionen beziehen sich auf die Annotation der korrigierte Deckblätter"),
+
+                            shiny::checkboxInput(inputId="show_points","Punkte pro Aufgabe anzeigen",value=TRUE ),
+                            shiny::checkboxInput(inputId="show_registration","Matrikelnummer anzeigen",value=TRUE ),
+                            shiny::checkboxInput(inputId="show_exam","Klausur-ID anzeigen",value=FALSE ),
+
                             shiny::actionButton(inputId = "do3", label="Bewerten")
                             )
                       )
@@ -115,6 +122,16 @@ server <- function(input, output, session) {
              solutions=input$solution_file$datapath,
              partial=input$partial,
              rule=input$scoring_rule)
+
+    # unpack files
+    unzip(input$solution_file$datapath,exdir = "temp_scans",junkpaths = TRUE)
+
+    # generate reports
+    grade_report(nops_eval_file="nops_eval.csv", path_to_scans="temp_scans",
+                 show_points=input$show_points,
+                 show_exam = input$show_exam,
+                 show_registration = input$show_registration)
+
   })
 
 
@@ -144,7 +161,9 @@ server <- function(input, output, session) {
     points <- input$points
 
     #print(input$docx_file)
-    converter(input$docx_file$datapath,subdir = "",include_tags=include_tags, exclude_tags=exclude_tags)
+    converter(input$docx_file$datapath,
+              output_directory = "",
+              include_tags=include_tags, exclude_tags=exclude_tags)
     print("CONVERSION DONE")
     files = list.files(path = "./",pattern = "*Rnw$")
     print(files)

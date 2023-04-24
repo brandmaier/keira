@@ -24,6 +24,8 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
                          res = NA,
                          styler = NULL,
                          show_points = FALSE,
+                         show_registration = TRUE,
+                         show_exam = FALSE,
                          debug = FALSE) {
 
   yoffset = 0
@@ -59,7 +61,7 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
   }
 
   if (is.null(styler))
-    styler <- list(hatch=hatch, rect=myrect)
+    styler <- list(hatch=hatch, rect=myrect, correct_rejection=function(...){})
 
   for (i in 1:nexams) {
 
@@ -95,6 +97,12 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
     plot(1, type="n", xlim=c(0, ncol(x)), ylim=c(0, nrow(x)), axes=FALSE, frame.plot=FALSE)
     rasterImage(x, 0, 0, ncol(x), nrow(x))
 
+    if (show_exam) {
+      text(200,3100, labels=paste0("Klausur-ID: ",evalcsv$exam[i]),cex=5,col="red")
+    }
+    if (show_registration) {
+      text(200,3200, labels=paste0("Matrikelnummer: ",evalcsv$registration[i]),cex=5,col="red")
+    }
     text(200,3300, labels=paste0("Note: ",evalcsv$mark[i]),cex=5,col="red")
     text(200,3400, labels=paste0("Punkte: ",round(as.numeric(evalcsv$points[i]),2)),cex=5,col="red")
 
@@ -190,6 +198,11 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
         {
           #cat(" |- Missed answer at ",k," drawing at",pos_x,",",pos_y,"\n")
           styler$hatch(pos_x, pos_y, pos_x+box_width, pos_y+box_height, col="red", pixelheight=pixelheight)
+        }
+
+        # correct non-response
+        if (answer==solution && answer=="0") {
+          styler$correct_rejection(pos_x, pos_y, pos_x+box_width, pos_y+box_height, pixelheight=pixelheight)
         }
 
       }

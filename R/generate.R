@@ -10,14 +10,14 @@
 generate <- function(files, n = 1, title = "", name="", course="M99",
                      showpoints = TRUE, intro = "(default)", points = NULL,
                      date = NULL, solution = FALSE, logo=NULL,
-                     institution=NULL) {
+                     institution=NULL, output_dir="exam") {
 
 if (is.null(points)) {
   points <- rep(1, length(files))
 }
 
 if (is.null(logo)) {
-  logo<-"C:/Users/andreas.brandmaier/Documents/msblogo.png"
+  logo<-here::here(msblogo.png)
 }
 
   if (is.null(date)) {
@@ -45,7 +45,7 @@ if (is.null(logo)) {
 
 ex1 <- examsMSB::exams2nops(files, n = n,
                   date = date,
-                  dir = "demo_nops_pdf", name = name,
+                  dir = output_dir, name = name,
                   #date = "2022-02-29",
                   points = points, # Immer 1 Punkt pro MC-Frage
                   showpoints = showpoints,
