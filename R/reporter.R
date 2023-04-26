@@ -26,12 +26,27 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
                          show_points = FALSE,
                          show_registration = TRUE,
                          show_exam = FALSE,
-                         debug = FALSE) {
+                         debug = FALSE,
+                         hints=list(window_width=480,  yoffset = NA,
+                                    xoffset = NA)) {
 
-  yoffset = 0
-  xoffset = 0
+  xoffset <- hints$xoffset
+  yoffset <- hints$yoffset
 
   path <- path_to_scans
+
+  if(!file.exists(path)) {
+    stop(paste0("File ",path," does not exist!"))
+  }
+
+  if (endsWith(path,".zip")) {
+    temp_dir <- paste0(tempdir(),"\\","msbexams",sep="")
+    if (!file.exists(temp_dir))  dir.create(temp_dir)
+
+    # extract the zip file to the temporary directory
+    unzip(zipfile=path, exdir = temp_dir, junkpaths = TRUE)
+    path <- temp_dir
+  }
 
   if (!dir.exists(outfolder)) {
     dir.create(outfolder)
@@ -94,7 +109,7 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
     } else {
       stop("Unknown graphics format! Try png or jpg")
     }
-    plot(1, type="n", xlim=c(0, ncol(x)), ylim=c(0, nrow(x)), axes=FALSE, frame.plot=FALSE)
+    plot(NULL, xlab="",ylab="",type="n", xlim=c(0, ncol(x)), ylim=c(0, nrow(x)), axes=FALSE, frame.plot=FALSE)
     rasterImage(x, 0, 0, ncol(x), nrow(x))
 
     if (show_exam) {
@@ -106,7 +121,7 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
     text(200,3300, labels=paste0("Note: ",evalcsv$mark[i]),cex=5,col="red")
     text(200,3400, labels=paste0("Punkte: ",round(as.numeric(evalcsv$points[i]),2)),cex=5,col="red")
 
-    startpos <- c( 330,1840) / c(2480, 3507)
+    startpos <- c( -55, 1720) / c(2480, 3507)
     incx <- (420-330) / 2480
     incy <- (1920-1840) /3507
 
@@ -115,28 +130,44 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
     gapx2 <- (1730-1050) / 2480
 
 
-    # find fixation cross
-    window_height <- 100 # from 100 to 300
-    found <- FALSE
-    while (!found && window_height <= 300) {
-      searchwindow_topleft_mark <- x[200:(200+window_height), 0:500,1]
-      #image(searchwindow_topleft_mark)
-      rowmin <- which.min( (apply(searchwindow_topleft_mark, 1, mean)-0.9)^2 )  # Zeile
-      colmin <- which.min( (apply(searchwindow_topleft_mark, 2, mean)-0.85)^2)  # Spalte
-      window_height = window_height + 100
+   # if (debug) browser()
+    topleft_match <- find_crosshair(x, starty=150, startx=0, window_width = 450)
+    bottomright_match <- find_crosshair(x,starty = 3200,startx = 2000, window_width=400)
 
-      minvalrow <- min((apply(searchwindow_topleft_mark, 1, mean)))
-      if (minvalrow < 0.99) found <- TRUE
-    }
+    rowmin <- topleft_match$rowmin
+    colmin <- topleft_match$colmin
+
+    #if (!found) {
+    #  stop("Error! Could not detect crosshairs!")
+    #}
+
 
     if (debug) {
       cat("Crosshair #",i,"(",evalcsv$registration[i],"): ",colmin,", ",rowmin,"\n")
-      myrect(x1=colmin-20, y1=200+rowmin-20,x2=colmin+20, y2=200+rowmin+20, lwd=3, col = "blue", pixelheight=pixelheight)
-      myrect(x1=0,x2=500,y1=200,y2=500,lwd=1,col="blue", pixelheight=pixelheight)
+      myrect(x1=colmin-20, y1=rowmin-20,x2=colmin+20,
+             y2=rowmin+20, lwd=3, col = "blue", pixelheight=pixelheight)
+      myrect(x1=0,x2=450,y1=150,y2=450,
+             lwd=1,col="blue", pixelheight=pixelheight)
+
+      colmin2 <- bottomright_match$colmin
+      rowmin2 <- bottomright_match$rowmin
+      myrect(x1=colmin2-20, y1=rowmin2-20,
+             x2=colmin2+20, y2=rowmin2+20, lwd=3, col = "blue", pixelheight=pixelheight)
+      myrect(x1=2000,x2=2000+400,
+             y1=3200,y2=3500,lwd=1,col="blue", pixelheight=pixelheight)
+
+      text(400,300, cex=5, labels=paste0("@(",rowmin,",",colmin,"); (",rowmin2,",",colmin2,")"), col="blue")
+
+      w_diff <- colmin2-colmin
+      h_diff <- rowmin2-rowmin
+      text(400,500, cex=5, labels=paste0("WD: ",w_diff," HD: ",h_diff),col="blue")
+
     }
 
+#    rowmin <- rowmin+200
+
     yoffset <- (rowmin-62)
-    #xoffset <- (colmin-395)
+    xoffset<- (colmin)
 
     resizer <- c(pixelwidth, pixelheight)
 
@@ -218,5 +249,36 @@ grade_report <- function(nops_eval_file="nops_eval.csv",
   }
 
   on.exit({})
+
+}
+
+find_crosshair <- function(x,
+                           start_window_height=100,
+                           max_window_height=300,
+                           starty=200,
+                           startx=0,
+                           window_width=400) {
+
+# find fixation cross
+window_height <- start_window_height # from 100 to 300
+found <- FALSE
+while (!found && window_height <= max_window_height) {
+
+  searchwindow_topleft_mark <- x[starty:(starty+window_height), startx:(startx+window_width),1]
+
+
+#  rowmin <- which.min( (apply(searchwindow_topleft_mark, 1, mean)-0.9)^2 )  # Zeile
+#  colmin <- which.min( (apply(searchwindow_topleft_mark, 2, mean)-0.85)^2)  # Spalte
+  rowmin <- which.min( apply(searchwindow_topleft_mark, 1, mean))  # Zeile
+  colmin <- which.min( apply(searchwindow_topleft_mark, 2, mean))  # Spalte
+
+  window_height = window_height + 100
+
+  minvalrow <- min((apply(searchwindow_topleft_mark, 1, mean)))
+
+  if (minvalrow < 0.99) found <- TRUE
+}
+
+return(list(found=found, rowmin=starty+rowmin, colmin=startx+colmin))
 
 }
