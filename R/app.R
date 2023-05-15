@@ -14,7 +14,7 @@
 std_text =  "(default)"
 
 
-page1 <- fluidPage(
+page1 <- shiny::fluidPage(
 
 shiny::textInput("title","Titel der Klausur", value="M25 - Forschungsmethodik"),
 shiny::textInput("course","Modulnummer", value="M25"),
