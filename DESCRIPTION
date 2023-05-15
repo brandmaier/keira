@@ -13,6 +13,7 @@ Imports: officer,
   tidyverse,
   stringr,
   shiny,
+  exams,
   examsMSB,
   here,
   dplyr
