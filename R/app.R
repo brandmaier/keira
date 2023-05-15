@@ -8,8 +8,8 @@
 #
 
 
-library(shiny)
-library(exams)
+#library(shiny)
+#library(exams)
 
 std_text =  "(default)"
 

@@ -1,4 +1,4 @@
-library(keira)
+#library(keira)
 
 dir.create("temp")
 converter("misc/Testdoc.docx")
