@@ -14,10 +14,14 @@ generate <- function(files, n = 1, title = "", name="", course="M99",
 
 if (is.null(points)) {
   points <- rep(1, length(files))
+} else {
+  if (length(points)==1) {
+      points <- rep(points, length(files))
+  }
 }
 
 if (is.null(logo)) {
-  logo<-here::here(msblogo.png)
+  logo<-here::here("msblogo.png")
 }
 
   if (is.null(date)) {
@@ -61,7 +65,8 @@ ex1 <- examsMSB::exams2nops(files, n = n,
                   intro = intro,
                   #sep="",collapse = ""),
                   verbose=FALSE,
-                  blank = 0, usepackage=c("color"),
+                  blank = 0,
+                  usepackage=c("color"),
                   solution = solution
 )
 
