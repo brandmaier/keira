@@ -52,7 +52,7 @@ NULL)
 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- shiny::fluidPage(
 
     tags$head(tags$script(src = "message-handler.js")),
 
@@ -80,7 +80,7 @@ ui <- fluidPage(
                                ),
                       tabPanel("(II) Einlesen",
 
-                               fluidPage(
+                               shiny::fluidPage(
 
                                shiny::h1("Einlesen")
                                ,  shiny::fileInput("exam_file", "Gescannte Klausuren (als ZIP-Datei)"),
