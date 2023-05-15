@@ -1,3 +1,4 @@
 exportPattern("^[[:alpha:]]+")
 
 importFrom("dplyr","%>%")
+import("shiny")

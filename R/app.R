@@ -72,13 +72,13 @@ ui <- shiny::fluidPage(
 
 
         # Show a plot of the generated distribution
-        mainPanel(
-          tabsetPanel(type = "tabs",
-                      tabPanel("(I) Erstellen",
+        shiny::mainPanel(
+          shiny::tabsetPanel(type = "tabs",
+                      shiny::tabPanel("(I) Erstellen",
                                page1
 
                                ),
-                      tabPanel("(II) Einlesen",
+                      shiny::tabPanel("(II) Einlesen",
 
                                shiny::fluidPage(
 
@@ -90,8 +90,8 @@ ui <- shiny::fluidPage(
 
                                ),
 
-                      tabPanel("(III) Auswerten",
-                          fluidPage(
+                      shiny::tabPanel("(III) Auswerten",
+                          shiny::fluidPage(
                             shiny::h1("Auswerten"),
                             shiny::fileInput("scanned_file", "Gescannte Klausuren aus Schritt II (als ZIP-Datei)"),
                             shiny::fileInput("solution_file", "Datei mit korrekten Antworten (*.rds)"),
