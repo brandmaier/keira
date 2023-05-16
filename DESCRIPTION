@@ -16,4 +16,5 @@ Imports: officer,
   exams,
   examsMSB,
   here,
-  dplyr
+  dplyr,
+  png
