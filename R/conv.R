@@ -20,12 +20,7 @@ convert_latex_simple <- function(x) {
 #'
 #' @export
 convert_latex <- function(x) {
-  x <- stringr::str_replace_all(x, "Ä", "\\\\\\\\\"A")
-  x <- stringr::str_replace_all(x, "Ö", "\\\\\\\\\"O")
-  x <- stringr::str_replace_all(x, "Ü", "\\\\\\\\\"U")
-  x <- stringr::str_replace_all(x, "ä", "\\\\\\\\\"a")
-  x <- stringr::str_replace_all(x, "ö", "\\\\\\\\\"o")
-  x <- stringr::str_replace_all(x, "ü", "\\\\\\\\\"u")
+
   x <- stringr::str_replace_all(x, "ß", "{\\\\\\\\ss}")
   x <- stringr::str_replace_all(x, "%", "{\\\\\\\\%}")
   #x <- stringr::str_replace_all(x, "#", "{\\\\\\\\#}")
@@ -36,9 +31,20 @@ convert_latex <- function(x) {
   x <- stringr::str_replace_all(x, "„", "{\\\\\\\\glqq}")
   x <- stringr::str_replace_all(x, "“", "\\\\\\\\grqq{}")
   x <- stringr::str_replace_all(x, "”", "\\\\\\\\grqq{}")
+  x <- stringr::str_replace_all(x, "\"", "\\\\\\\\grqq{}")
   x <- stringr::str_replace_all(x, "’","'")
   x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u00A0"),"\\\\\\\\,") # non-breaking space U+00A0
   x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u0094"),"\\\\\\\\grqq{}")
+
+
+  # those have to come after the quotation marks to avoid replacing the LaTeX codes from above
+  x <- stringr::str_replace_all(x, "Ä", "\\\\\\\\\"A")
+  x <- stringr::str_replace_all(x, "Ö", "\\\\\\\\\"O")
+  x <- stringr::str_replace_all(x, "Ü", "\\\\\\\\\"U")
+  x <- stringr::str_replace_all(x, "ä", "\\\\\\\\\"a")
+  x <- stringr::str_replace_all(x, "ö", "\\\\\\\\\"o")
+  x <- stringr::str_replace_all(x, "ü", "\\\\\\\\\"u")
+
   #str.decode("utf-8").replace(u"\u2022", "*")
 
   x
