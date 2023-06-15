@@ -91,12 +91,11 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
              lwd = 10,
              col = "red",
              pixelheight = NULL) {
-      #cat("Coords:", x1,pixelheight-y2,x2,pixelheight-y1,"\n")
       graphics::rect(x1,
                      pixelheight - y2,
                      x2,
                      pixelheight - y1,
-                     lwd = 10,
+                     lwd = lwd,
                      border = col)
     }
 
@@ -123,23 +122,24 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
     pixelwidth <- dim(x)[2]
     pixelheight <- dim(x)[1]
 
-    if (pixelwidth < 2476 | pixelwidth > 2484) {
-      warning(
-        paste0(
-          "The report generator expects a page width of 2480 pixel, that is, a scan with 300 DPI. The pixel size of the current document is ",
-          pixelwidth,
-          " pixels"
-        )
-      )
-    }
-
-
 
     scaling_factor_x <- pixelwidth / 2480 # <1 if lower resolution
     scaling_factor_y <- pixelheight / 3507 # <1 if lower resolution
 
+    scaling_cex <- scaling_factor_y
+
+    if (pixelwidth < 2476 | pixelwidth > 2484) {
+      warning(
+        paste0(
+          "The report generator expects a page width of 2480 pixel, that is, a A4 scan with 300 DPI. The pixel size of the current document is ",
+          pixelwidth,
+          " pixels.\nContinuing with scaling factors ",scaling_factor_x," and ",scaling_factor_y,"."
+        )
+      )
+    }
+
     if (!test_fuzzy_equal(scaling_factor_x, scaling_factor_y, pdiff = 2)) {
-      warning("X and Y scaling factors differ substantially (>2%).")
+      stop("Error! X and Y scaling factors differ substantially (>2%).")
     }
 
     if (graphics_format == "png")
@@ -160,7 +160,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       )
 
     if (graphics_format == "png") {
-      # cat("PNG output\n")
+
       png(
         outfile,
         width = ncol(x),
@@ -169,7 +169,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       )
     } else if (graphics_format == "jpg" ||
                graphics_format == "jpeg") {
-      # cat("JPG output\n")
+
       jpeg(
         outfile,
         width = ncol(x),
@@ -194,59 +194,64 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
 
     if (show_exam) {
       text(
-        200,
-        3100,
+        200 * scaling_factor_x,
+        3100 * scaling_factor_y,
         labels = paste0("Klausur-ID: ", evalcsv$exam[i]),
-        cex = 5,
+        cex = 5 * scaling_cex,
         col = "red"
       )
     }
     if (show_registration) {
       text(
-        200,
-        3200,
+#        200 * scaling_factor_x,
+#        3200 * scaling_factor_y,
+        1200 * scaling_factor_x,
+        3400 * scaling_factor_y,
         labels = paste0("Matrikelnummer: ", evalcsv$registration[i]),
-        cex = 5,
+        cex = 5 * scaling_cex,
         col = "red"
       )
     }
     text(
-      200,
-      3300,
+      200 * scaling_factor_x,
+      3300 * scaling_factor_y,
       labels = paste0("Note: ", evalcsv$mark[i]),
-      cex = 5,
+      cex = 5 * scaling_cex,
       col = "red"
     )
     text(
-      200,
-      3400,
+      200 * scaling_factor_x,
+      3400 * scaling_factor_y,
       labels = paste0("Punkte: ", round(as.numeric(
         evalcsv$points[i]
       ), 2)),
-      cex = 5,
+      cex = 5 * scaling_cex,
       col = "red"
     )
 
-    startpos <- c(-55, 1720) / c(2480, 3507)
-    incx <- (420 - 330) / 2480
-    incy <- (1920 - 1840) / 3507
+    startpos <- c(-55, 1720) / c(2480, 3507) #* c(scaling_factor_x, scaling_factor_y)
+    incx <- (420 - 330) / 2480 #* scaling_factor_x
+    incy <- (1920 - 1840) / 3507 #* scaling_factor_y
 
-    extragapy <- (2700 - 2590 - 60 - 20) / 3507
-    gapx1 <- c(1050 - 324) / 2480  # old between 1 and 2
-    gapx2 <- (1730 - 1050) / 2480
+    extragapy <- (2700 - 2590 - 60 - 20) / 3507 #* scaling_factor_y
+    gapx1 <- c(1050 - 324) / 2480# * scaling_factor_x  # old between 1 and 2
+    gapx2 <- (1730 - 1050) / 2480 #* scaling_factor_x
 
 
     # if (debug) browser()
     topleft_match <-
       find_crosshair(x,
-                     starty = 150,
+                     starty = (150* scaling_factor_y),
                      startx = 0,
-                     window_width = 450)
+                     window_width = (450* scaling_factor_x),
+                     height_increment = 100 * scaling_factor_y)
+
     bottomright_match <-
       find_crosshair(x,
-                     starty = 3200,
-                     startx = 2000,
-                     window_width = 400)
+                     starty = (3200 * scaling_factor_y),
+                     startx = (2000 * scaling_factor_x),
+                     window_width = (400* scaling_factor_x),
+                     height_increment = 100 * scaling_factor_y)
 
     rowmin <- topleft_match$rowmin
     colmin <- topleft_match$colmin
@@ -266,6 +271,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
           ", ",
           rowmin,
           "\n")
+      # indicate top left crosshair
       myrect(
         x1 = colmin - 20,
         y1 = rowmin - 20,
@@ -275,11 +281,12 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         col = "blue",
         pixelheight = pixelheight
       )
+      # indicate search window
       myrect(
         x1 = 0,
-        x2 = 450,
-        y1 = 150,
-        y2 = 450,
+        x2 = 450*scaling_factor_x,
+        y1 = 150*scaling_factor_y,
+        y2 = 450*scaling_factor_y,
         lwd = 1,
         col = "blue",
         pixelheight = pixelheight
@@ -296,20 +303,21 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         col = "blue",
         pixelheight = pixelheight
       )
+      # indicate search window
       myrect(
-        x1 = 2000,
-        x2 = 2000 + 400,
-        y1 = 3200,
-        y2 = 3500,
+        x1 = 2000*scaling_factor_x,
+        x2 = (2000 + 400)*scaling_factor_x,
+        y1 = 3200*scaling_factor_x,
+        y2 = 3500*scaling_factor_y,
         lwd = 1,
         col = "blue",
         pixelheight = pixelheight
       )
 
       text(
-        400,
-        300,
-        cex = 5,
+        400*scaling_factor_x,
+        300*scaling_factor_y,
+        cex = 5 * scaling_cex,
         labels = paste0("@(", rowmin, ",", colmin, "); (", rowmin2, ",", colmin2, ")"),
         col = "blue"
       )
@@ -317,21 +325,30 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       w_diff <- colmin2 - colmin
       h_diff <- rowmin2 - rowmin
       text(
-        400,
-        500,
-        cex = 5,
+        400*scaling_factor_x,
+        500*scaling_factor_y,
+        cex = 5 * scaling_cex,
         labels = paste0("WD: ", w_diff, " HD: ", h_diff),
         col = "blue"
       )
 
     }
+    # -- end debug output --
 
-    #    rowmin <- rowmin+200
+   # scaling_factor_y <- 1
+    #scaling_factor_x <- 1
 
-    yoffset <- (rowmin - 62)
+    yoffset <- (rowmin - (62 * scaling_factor_y))
     xoffset <- (colmin)
 
-    resizer <- c(pixelwidth, pixelheight)
+    #myrect( xoffset-30,
+    #        yoffset-30,
+    #        xoffset+30,
+    #        yoffset+30,
+    #        lwd=1,
+    #        col="purple",pixelheight=2)
+
+    #resizer <- c(pixelwidth, pixelheight)
 
     # load info
     for (j in 1:45) {
@@ -341,7 +358,6 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       answer_pattern <- evalcsv[i, answercol]
       solution_pattern <-
         evalcsv[i, paste0("solution.", j, collapse = "")]
-      #cat("-> Item ",j,"\n")
 
       if (show_points) {
         within_col_j <- (j - 1) %% 15 + 1
@@ -360,11 +376,11 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         points <-
           round(as.numeric(evalcsv[i, paste0("points.", j, collapse = "", sep = "")]), 2)
         text(
-          x = pos_x - 95,
-          y = pixelheight - pos_y - 10,
+          x = pos_x - (95 * scaling_factor_x),
+          y = pixelheight - pos_y - (10 * scaling_factor_y),
           labels = paste0(points, " P."),
           col = "red",
-          cex = 2
+          cex = 2 * scaling_cex
         )
       }
 
@@ -387,8 +403,8 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         pos_x <- pos_x * pixelwidth + xoffset
         pos_y <- pos_y * pixelheight + yoffset
 
-        box_width <- 50
-        box_height <- 44
+        box_width <- (50 * scaling_factor_x)
+        box_height <- (44 * scaling_factor_y)
 
         # correct checkmark -> green box
         if (answer == solution && answer == "1") {
@@ -399,7 +415,8 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
             pos_x + box_width,
             pos_y + box_height,
             col = "green",
-            pixelheight = pixelheight
+            pixelheight = pixelheight,
+            lwd = 10 * scaling_cex
           )
         }
 
@@ -413,7 +430,8 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
             pos_x + box_width,
             pos_y + box_height,
             col = "red",
-            pixelheight = pixelheight
+            pixelheight = pixelheight,
+            lwd = 10 * scaling_cex
           )
         }
 
@@ -427,7 +445,8 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
             pos_x + box_width,
             pos_y + box_height,
             col = "red",
-            pixelheight = pixelheight
+            pixelheight = pixelheight,
+            lwd = 8 * scaling_cex
           )
         }
 
