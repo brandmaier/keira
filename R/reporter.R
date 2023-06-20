@@ -22,7 +22,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          graphics_format = "png",
                          jpg_quality = 75,
                          res = NA,
-                         styler = NULL,
+                         style = style_semitransparent,
                          show_points = FALSE,
                          show_registration = TRUE,
                          show_exam = FALSE,
@@ -99,8 +99,8 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                      border = col)
     }
 
-  if (is.null(styler))
-    styler <-
+  if (is.null(style))
+    style <-
     list(
       hatch = hatch,
       rect = myrect,
@@ -409,7 +409,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         # correct checkmark -> green box
         if (answer == solution && answer == "1") {
           #cat(" |- Correct answer at ",k," drawing at",pos_x,",",pos_y,"\n")
-          styler$rect(
+          style$rect(
             pos_x,
             pos_y,
             pos_x + box_width,
@@ -424,7 +424,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         if (answer == "1" && solution == "0")
         {
           #cat(" |- Wrong answer at ",k," drawing at",pos_x,",",pos_y,"\n")
-          styler$rect(
+          style$rect(
             pos_x,
             pos_y,
             pos_x + box_width,
@@ -439,7 +439,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         if (solution == "1" && answer == "0")
         {
           #cat(" |- Missed answer at ",k," drawing at",pos_x,",",pos_y,"\n")
-          styler$hatch(
+          style$hatch(
             pos_x,
             pos_y,
             pos_x + box_width,
@@ -452,7 +452,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
 
         # correct non-response
         if (answer == solution && answer == "0") {
-          styler$correct_rejection(pos_x,
+          style$correct_rejection(pos_x,
                                    pos_y,
                                    pos_x + box_width,
                                    pos_y + box_height,

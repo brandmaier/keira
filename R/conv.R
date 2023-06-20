@@ -26,7 +26,6 @@ convert_latex <- function(x) {
   #x <- stringr::str_replace_all(x, "#", "{\\\\\\\\#}")
   #x <- stringr::str_replace_all(x, "$", "{\\\\\\\\$}")
   x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
-  #x <- stringr::str_replace_all(x, "&", "{\\\\\\\\&}")
   x <- stringr::str_replace_all(x, "…", "$\\\\\\\\ldots$")
   x <- stringr::str_replace_all(x, "„", "{\\\\\\\\glqq}")
   x <- stringr::str_replace_all(x, "“", "\\\\\\\\grqq{}")
@@ -36,6 +35,10 @@ convert_latex <- function(x) {
   x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u00A0"),"\\\\\\\\,") # non-breaking space U+00A0
   x <- stringr::str_replace_all(x,stringi::stri_unescape_unicode("\\u0094"),"\\\\\\\\grqq{}")
 
+  x <- stringr::str_replace_all(x, "—","---")
+  x <- stringr::str_replace_all(x, "–","--")
+  x <- stringr::str_replace_all(x, "~","\\\\\\\\tilde")
+  x <- stringr::str_replace_all(x, "°","\\\\\\\\textdegree")
 
   # those have to come after the quotation marks to avoid replacing the LaTeX codes from above
   x <- stringr::str_replace_all(x, "Ä", "\\\\\\\\\"A")
