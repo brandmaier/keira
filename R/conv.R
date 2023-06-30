@@ -176,7 +176,7 @@ converter <- function(input_file,
         # continue the text
         current_item_text = paste0(current_item_text,"\n \\\\\\\\ \n",cur_element$text)
       } else { # (prev_level == -1)
-        current_item_text = paste0(current_item_text,"\n",cur_element$text)
+        current_item_text = paste0(current_item_text,"",cur_element$text)
       }
 
 
