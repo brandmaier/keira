@@ -9,7 +9,7 @@ License: proprietary
 Encoding: UTF-8
 LazyData: true
 Imports: officer, 
-  tidyverse
+  tidyverse,
   stringr,
   shiny,
   exams,
