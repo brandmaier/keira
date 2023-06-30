@@ -4,13 +4,12 @@ Title: an interface to generate machine-readable exams from a Word template file
 Version: 0.1.1
 Author:  Andreas M. Brandmaier <andreas.brandmaier@medicalschool-berlin.de>
 Maintainer: Andreas M. Brandmaier <andreas.brandmaier@medicalschool-berlin.de>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: An interface to the exams package to generate machine-readable exams from a Word template file and generate fancy report cards
 License: proprietary
 Encoding: UTF-8
 LazyData: true
-Imports: officer,
-  tidyverse,
+Imports: officer, 
+  tidyverse
   stringr,
   shiny,
   exams,

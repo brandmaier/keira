@@ -1,14 +1,18 @@
 #library(keira)
+#debug(converter)
 
 dir.create("temp")
-converter("misc/Testdoc.docx")
+converter("misc/Testdoc.docx", debug=TRUE)
 
 # this is supposed to fail!
 converter("misc/testcase-answer-missing.docx")
 
+#keira::generate(files="items/",title="M99 - Yeah", course="M99",points = 1,name = "xx",intro = "",output_dir = "out")
+
 # this is supposed to work
 converter("misc/testcase-multiple-answers-correct.docx")
 
+converter("misc/multiline_items.docx")
 
 converter("../../../Lehre/M25-P-WS-2022/9.Klausur/Klausurfragen-Pool2.docx", debug=FALSE,
           include_tags = "#probeklausur", exclude_tags=c())

@@ -1,8 +1,7 @@
 
-
-#library(officer)
-#library(tidyverse)
-#library(stringr)
+# PARSER
+# if cur==1: complete_prev_questions; add new temp q
+# if cur==2: add item information
 
 
 
@@ -72,10 +71,14 @@ converter <- function(input_file,
 
   content <- doc %>% officer::docx_summary()
 
+  # add a fake final line (needed for all questions to be complete)
+  content <- content %>% dplyr::add_row(doc_index= max(content$doc_index)+1, text="END OF DOCUMENT (Must not be empty; you should never read this line; if so, something went wrong.",
+                                 content_type="paragraph",style_name="List Paragraph",level=1)
+
   #
   # get all questions
   #
-  q <- doc %>% officer::docx_summary() %>% dplyr::filter(style_name == "List Paragraph")
+  q <- content %>% dplyr::filter(style_name == "List Paragraph")
 
   if (nrow(q)==0) {
     stop("Error! Did not find any elements of type list paragraph! Please make sure all items are lists!")
@@ -93,16 +96,20 @@ converter <- function(input_file,
   current_answer_id <- 1
   current_mode <- "q"
 
+  prev_level <- -1
+
   for (i in 1:num_elements) {
     cur_element <- content %>% dplyr::filter(doc_index == i)
 
     # skip empty lines
     if (cur_element$text=="") { next; }
 
+    # if no level is defined, set it to previous level
     level <- cur_element$level
     if (is.na(level))
-      level <- -1
+      level <- prev_level
 
+    # debug output
     if (debug)
       cat(
         "level ",
@@ -111,12 +118,17 @@ converter <- function(input_file,
         cur_element$text,
         "; has (X):",
         endsWith(cur_element$text, "(x)"),
+        "line #", i,
         "\n"
       )
 
     if (level == 1) {
       # store old question info
-      if (i != 1) {
+
+      # --> beginning of a new question block (after at least one
+      # is completed)
+      # => add previous question block
+      if (prev_level == 2) {
         # check if question is valid
 
         # extract hash tags
@@ -156,9 +168,18 @@ converter <- function(input_file,
         current_item_answers <- c()
         current_item_correct <- c()
         current_answer_id <- 1
+        # start new question text body
+        current_item_text = cur_element$text
+
+      } else if (prev_level == 1) {
+        # we are again at level 1 (or -1 if document begin or previous error), so
+        # continue the text
+        current_item_text = paste0(current_item_text,"\n \\\\\\\\ \n",cur_element$text)
+      } else { # (prev_level == -1)
+        current_item_text = paste0(current_item_text,"\n",cur_element$text)
       }
-      # new question
-      current_item_text = cur_element$text
+
+
     } else if (level == 2) {
       answer <- cur_element$text
       answer <- trimws(answer, which = "both")
@@ -173,36 +194,13 @@ converter <- function(input_file,
       # ignore
     }
 
+  prev_level = level
+
   }
 
 
 
-  # add last item
-  #items <- c(items, list(current_item_text, current_item_answers, current_item_correct))
-  # check exclusion criteria
-  # extract hash tags
-  tokens <- strsplit(current_item_text, "\\s+")[[1]]
-  regex <- "#[[:alnum:]:\\.]+"
-  matches <- grep(regex, tokens, value = TRUE)
-  skip_question <- any(matches %in% exclude_tags)
-
-  # check inclusion
-  if (!skip_question) {
-    if (length(include_tags) > 0) {
-      skip_question <- !(any(matches %in% include_tags))
-    }
-  }
-  if (!skip_question) {
-  items <-
-    append(items,
-           list(
-             current_item_text,
-             current_item_answers,
-             current_item_correct
-           ))
-  }
-
-  # write files
+# define file template
 
   file_template <- "
 \\begin{question}
