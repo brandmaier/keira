@@ -1,0 +1,12 @@
+---
+title: "Changelog"
+author: "Andreas Brandmaier"
+format: html
+editor: visual
+---
+
+## Changelog
+
+2027/07/10
+
+Added a check for non-ASCII, non-convertable characters. Informative warning messages are now issued that help users to find potentially problematic characters.
