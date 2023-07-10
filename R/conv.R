@@ -58,7 +58,7 @@ convert_latex <- function(x) {
 #' @param exlude_tags
 #' @param include_tags
 #'
-#'
+#' @export
 converter <- function(input_file,
                       output_directory = "items/",
                       exclude_tags = c(),
@@ -103,6 +103,15 @@ converter <- function(input_file,
 
     # skip empty lines
     if (cur_element$text=="") { next; }
+
+    # check for non-ASCII characters
+    cur_text <- cur_element$text
+    utf_hits <- findNonASCII(string = cur_text)
+    if (!is.null(utf_hits)) {
+      chars <- paste0(sapply(utf_hits, function(pos){ substr(cur_text,pos,pos) }),sep="",collapse = " ")
+      warning(paste0("Found non-ASCII characters in item ",current_answer_id,", which may not show up in final exams:",
+                     chars,"\n"))
+    }
 
     # if no level is defined, set it to previous level
     level <- cur_element$level

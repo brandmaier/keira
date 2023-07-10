@@ -1,4 +1,4 @@
-#library(keira)
+library(keira)
 #debug(converter)
 
 dir.create("temp")
@@ -6,6 +6,9 @@ converter("misc/Testdoc.docx", debug=TRUE)
 
 # this is supposed to fail!
 converter("misc/testcase-answer-missing.docx")
+
+# utf document
+converter("misc/utf.docx")
 
 #keira::generate(files="items/",title="M99 - Yeah", course="M99",points = 1,name = "xx",intro = "",output_dir = "out")
 

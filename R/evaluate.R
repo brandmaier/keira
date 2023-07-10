@@ -1,3 +1,4 @@
+#' @export
 evaluate <-
   function(scans,
            solutions,

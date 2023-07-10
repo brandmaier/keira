@@ -1,4 +1,7 @@
-# graphics helper function
+#' graphics helper function
+#'
+#' @export
+#'
 hatch <- function(x1, y1, x2, y2, lwd=8, col=RED,  pixelheight = NULL)
 {
   y1 <- pixelheight - y1
@@ -7,7 +10,9 @@ hatch <- function(x1, y1, x2, y2, lwd=8, col=RED,  pixelheight = NULL)
   lines( c(x1,x2),c(y2,y1), lwd=lwd, col=col)
 }
 
-# graphics helper function
+#'  graphics helper function
+#'
+#' @export
 myrect <- function(x1, y1, x2, y2, lwd=10, col="red", pixelheight=NULL) {
 
   if (col=="red") {
