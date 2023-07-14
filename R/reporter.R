@@ -24,12 +24,16 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          res = NA,
                          style = style_semitransparent,
                          show_points = FALSE,
+                         show_points_total = FALSE,
                          show_registration = TRUE,
                          show_exam = FALSE,
                          debug = FALSE,
                          hints = list(window_width = 480,
                                       yoffset = NA,
-                                      xoffset = NA)) {
+                                      xoffset = NA,
+                                      extragapy_rel = NA,
+                                      gapx1 = NA,
+                                      gapx2 = NA)) {
   xoffset <- hints$xoffset
   yoffset <- hints$yoffset
 
@@ -229,14 +233,32 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       col = "red"
     )
 
-    startpos <- c(-55, 1720) / c(2480, 3507) #* c(scaling_factor_x, scaling_factor_y)
-    incx <- (420 - 330) / 2480 #* scaling_factor_x
-    incy <- (1920 - 1840) / 3507 #* scaling_factor_y
+    startpos_rel <- c(-55, 1720) / c(2480, 3507) #* c(scaling_factor_x, scaling_factor_y)
+    incx_rel <- (420 - 330) / 2480 #* scaling_factor_x
+    incy_rel <- (1920 - 1840) / 3507 #* scaling_factor_y
 
-    extragapy <- (2700 - 2590 - 60 - 20) / 3507 #* scaling_factor_y
-    gapx1 <- c(1050 - 324) / 2480# * scaling_factor_x  # old between 1 and 2
-    gapx2 <- (1730 - 1050) / 2480 #* scaling_factor_x
+    #
+    # extragapy is the (relative) height of the white space between every block of 5 items
+    #
+    #extragapy <- (2700 - 2590 - 60 - 20) / 3507 #* scaling_factor_y   # used to work but too small now
+    if (is.na(hints$extragapy_rel)) {
+      extragapy_rel <- (2700 - 2590 - 60 - 20 + 20) / 3507  # this works on PDF->PNG(300DPI) without scanning
+    } else {
+      extragapy_rel <- hints$extragapy_rel
+    }
 
+    #gapx1 <- c(1050 - 324) / 2480# * scaling_factor_x  # old between 1 and 2
+    #gapx2 <- (1730 - 1050) / 2480 #* scaling_factor_x
+    if (is.na(hints$gapx1)) {
+      gapx1 <- c(1050 - 324 + 30) / 2480# * scaling_factor_x  # old between 1 and 2
+    } else {
+      gapx1 <- hints$gapx1
+    }
+    if (is.na(hints$gapx2)) {
+      gapx2 <- (1730 - 1050 + 25) / 2480 #* scaling_factor_x
+    } else {
+      gapx2 <- hints$gapx2
+    }
 
     # if (debug) browser()
     topleft_match <-
@@ -359,26 +381,33 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       solution_pattern <-
         evalcsv[i, paste0("solution.", j, collapse = "")]
 
-      if (show_points) {
+      if (show_points || show_points_total) {
         within_col_j <- (j - 1) %% 15 + 1
         column <- ((j - 1) %/% 15) + 1
-        pos_x <- startpos[1]
+        pos_x <- startpos_rel[1]
         if (column == 2)
           pos_x <- pos_x + gapx1
         if (column == 3)
           pos_x <- pos_x + gapx1 + gapx2
         pos_y <-
-          startpos[2] + (incy) * (within_col_j - 1) + ((within_col_j - 1) %/% 5) *
-          extragapy
+          startpos_rel[2] + (incy_rel) * (within_col_j - 1) + ((within_col_j - 1) %/% 5) *
+          extragapy_rel
         pos_x <- pos_x * pixelwidth + xoffset
         pos_y <- pos_y * pixelheight + yoffset
 
         points <-
           round(as.numeric(evalcsv[i, paste0("points.", j, collapse = "", sep = "")]), 2)
+
+        if (show_points && !show_points_total) {
+          points_label <- (paste0(points, " P."))
+        } else {
+
+        }
+
         text(
           x = pos_x - (95 * scaling_factor_x),
           y = pixelheight - pos_y - (10 * scaling_factor_y),
-          labels = paste0(points, " P."),
+          labels = points_label,
           col = "red",
           cex = 2 * scaling_cex
         )
@@ -391,14 +420,14 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         within_col_j <- (j - 1) %% 15 + 1
         column <- ((j - 1) %/% 15) + 1
 
-        pos_x <- startpos[1] + (incx) * (k - 1) #+ ((j-1) %/% 15)*gapx
+        pos_x <- startpos_rel[1] + (incx_rel) * (k - 1) #+ ((j-1) %/% 15)*gapx
         if (column == 2)
           pos_x <- pos_x + gapx1
         if (column == 3)
           pos_x <- pos_x + gapx1 + gapx2
         pos_y <-
-          startpos[2] + (incy) * (within_col_j - 1) + ((within_col_j - 1) %/% 5) *
-          extragapy
+          startpos_rel[2] + (incy_rel) * (within_col_j - 1) + ((within_col_j - 1) %/% 5) *
+          extragapy_rel
 
         pos_x <- pos_x * pixelwidth + xoffset
         pos_y <- pos_y * pixelheight + yoffset
