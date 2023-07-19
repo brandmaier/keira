@@ -53,4 +53,4 @@ examsMSB::nops_eval(register=NULL,
 
 grade_report(nops_eval_file = "nops_eval.csv",
                     path_to_scans = "misc/testsuite/45items/scans_png/nops_scan_20230713094857.zip",
-                    outfolder = "reports",show_points = TRUE)
+                    outfolder = "reports",show_points = TRUE, show_points_total = TRUE)

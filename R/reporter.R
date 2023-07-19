@@ -232,8 +232,8 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       cex = 5 * scaling_cex,
       col = "red"
     )
-
-    startpos_rel <- c(-55, 1720) / c(2480, 3507) #* c(scaling_factor_x, scaling_factor_y)
+    #- (62 * scaling_factor_y)
+    startpos_rel <- c(-55, 1720-62) / c(2480, 3507) #* c(scaling_factor_x, scaling_factor_y)
     incx_rel <- (420 - 330) / 2480 #* scaling_factor_x
     incy_rel <- (1920 - 1840) / 3507 #* scaling_factor_y
 
@@ -277,6 +277,19 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
 
     rowmin <- topleft_match$rowmin
     colmin <- topleft_match$colmin
+
+    # stretch factor is 1882 (if page is 100% but printed on DINA4)
+    # stretch factor is 1807 (if page is shrunken to DINA4 to 96%)
+    stretch_factor <- (bottomright_match$colmin - topleft_match$colmin)
+    stretch_factor <- stretch_factor / 1882
+    cat("Stretch x", stretch_factor, "%\n")
+
+    gapx1 <- gapx1 * stretch_factor
+    gapx2 <- gapx2 * stretch_factor
+    extragapy_rel <- extragapy_rel * stretch_factor
+    incy_rel <- incy_rel * stretch_factor
+
+    startpos_rel <- startpos_rel * stretch_factor
 
     #if (!found) {
     #  stop("Error! Could not detect crosshairs!")
@@ -360,7 +373,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
    # scaling_factor_y <- 1
     #scaling_factor_x <- 1
 
-    yoffset <- (rowmin - (62 * scaling_factor_y))
+    yoffset <- (rowmin)
     xoffset <- (colmin)
 
     #myrect( xoffset-30,
@@ -393,7 +406,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
           startpos_rel[2] + (incy_rel) * (within_col_j - 1) + ((within_col_j - 1) %/% 5) *
           extragapy_rel
         pos_x <- pos_x * pixelwidth + xoffset
-        pos_y <- pos_y * pixelheight + yoffset
+        pos_y <- (pos_y * pixelheight) + yoffset
 
         points <-
           round(as.numeric(evalcsv[i, paste0("points.", j, collapse = "", sep = "")]), 2)
@@ -401,7 +414,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         if (show_points && !show_points_total) {
           points_label <- (paste0(points, " P."))
         } else {
-
+            browser()
         }
 
         text(
