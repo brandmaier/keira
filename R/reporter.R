@@ -12,6 +12,12 @@
 #' Punkten und Note im PNG-Format. Standardmäßig wird ein Ordner 'reports'
 #' erstellt, in dem diese Deckblätter abgelegt werden.
 #'
+#' @param nops_eval_file String. path to evaluation file (typically nops_eval.csv)
+#' @param path_to_scans String. file path to folder with individual scans of exam front pages
+#' @param show_points Boolean.
+#' @param show_registration Boolean. Print the recognized registration number on the report card
+#' @param show_grade Boolean. Print the final grade on the report card
+#'
 #' @author Andreas M. Brandmaier
 #'
 #' @export
@@ -24,7 +30,9 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          res = NA,
                          style = style_semitransparent,
                          show_points = FALSE,
-                         show_points_total = FALSE,
+                         show_points_total = TRUE,
+                         show_points_max = FALSE,
+                         show_grade = TRUE,
                          show_registration = TRUE,
                          show_exam = FALSE,
                          debug = FALSE,
@@ -216,6 +224,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         col = "red"
       )
     }
+    if (show_grade) {
     text(
       200 * scaling_factor_x,
       3300 * scaling_factor_y,
@@ -223,6 +232,8 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       cex = 5 * scaling_cex,
       col = "red"
     )
+    }
+    if (show_points_total) {
     text(
       200 * scaling_factor_x,
       3400 * scaling_factor_y,
@@ -232,6 +243,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       cex = 5 * scaling_cex,
       col = "red"
     )
+    }
     #- (62 * scaling_factor_y)
     startpos_rel <- c(-55, 1720-62) / c(2480, 3507) #* c(scaling_factor_x, scaling_factor_y)
     incx_rel <- (420 - 330) / 2480 #* scaling_factor_x
@@ -394,7 +406,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       solution_pattern <-
         evalcsv[i, paste0("solution.", j, collapse = "")]
 
-      if (show_points || show_points_total) {
+      if (show_points || show_points_max) {
         within_col_j <- (j - 1) %% 15 + 1
         column <- ((j - 1) %/% 15) + 1
         pos_x <- startpos_rel[1]
@@ -411,7 +423,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         points <-
           round(as.numeric(evalcsv[i, paste0("points.", j, collapse = "", sep = "")]), 2)
 
-        if (show_points && !show_points_total) {
+        if (show_points && !show_points_max) {
           points_label <- (paste0(points, " P."))
         } else {
             browser()

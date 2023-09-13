@@ -13,6 +13,9 @@ convert_latex_simple <- function(x) {
   x <- stringr::str_replace_all(x, "ö", "\\\"o")
   x <- stringr::str_replace_all(x, "ü", "\\\"u")
   x <- stringr::str_replace_all(x, "ß", "{\\ss}")
+  x <- stringr::str_replace_all(x, "\n", " \\\\ ")
+  x <- stringr::str_replace_all(x, "&", "{\\\\&}")
+  x <- stringr::str_replace_all(x, "\"", " \\\\grqq{}")
   x
 }
 #'
@@ -46,10 +49,23 @@ convert_latex <- function(x) {
   x <- stringr::str_replace_all(x, "ä", "\\\\\\\\\"a")
   x <- stringr::str_replace_all(x, "ö", "\\\\\\\\\"o")
   x <- stringr::str_replace_all(x, "ü", "\\\\\\\\\"u")
+  x <- stringr::str_replace_all(x, "₵", "\\\\\\\\textcolonmonetary")
 
   #str.decode("utf-8").replace(u"\u2022", "*")
 
   x
+}
+
+replace_symbol_at_position <- function(input_string, symbol, pos) {
+  if (pos < 1 || pos > nchar(input_string)) {
+    stop("Invalid position")
+  }
+
+  chars <- strsplit(input_string, "")[[1]]
+  chars[pos] <- symbol
+  new_string <- paste(chars, collapse = "")
+
+  return(new_string)
 }
 
 #'
@@ -65,7 +81,10 @@ converter <- function(input_file,
                       include_tags = c(),
                       debug = FALSE,
                       file_prefix="item",
-                      add_mchoice_instruction=FALSE) {
+                      add_mchoice_instruction=FALSE,
+                      check_for_missing_solutions=TRUE,
+                      ignore_unknown_characters=TRUE,
+                      shuffle_items=TRUE) {
 
   doc <- officer::read_docx(input_file)
 
@@ -74,6 +93,20 @@ converter <- function(input_file,
   # add a fake final line (needed for all questions to be complete)
   content <- content %>% dplyr::add_row(doc_index= max(content$doc_index)+1, text="END OF DOCUMENT (Must not be empty; you should never read this line; if so, something went wrong.",
                                  content_type="paragraph",style_name="List Paragraph",level=1)
+
+  # crazy Word hack now
+  # for when all elements are on list level 1 ...
+  if (all(na.omit(unique(content$level))==1)) {
+    warning("Warning! All paragraphs are on level 1. Using heuristic to determine correct levels.")
+    selector<-!is.na(content$level)
+    guess_qid <- (content$num_id[selector])[1]
+    q_select <- content$num_id == guess_qid
+    resp_select <- content$num_id != guess_qid
+    # reset events
+    content$level[resp_select] <-2
+  }
+
+  #
 
   #
   # get all questions
@@ -95,6 +128,7 @@ converter <- function(input_file,
   current_item_correct <- c()
   current_answer_id <- 1
   current_mode <- "q"
+  item_counter <- 1
 
   prev_level <- -1
 
@@ -109,8 +143,15 @@ converter <- function(input_file,
     utf_hits <- findNonASCII(string = cur_text)
     if (!is.null(utf_hits)) {
       chars <- paste0(sapply(utf_hits, function(pos){ substr(cur_text,pos,pos) }),sep="",collapse = " ")
-      warning(paste0("Found non-ASCII characters in item ",current_answer_id,", which may not show up in final exams:",
+      warning(paste0("Found non-ASCII characters in response ",current_answer_id," of item ",
+                     item_counter,", which may not show up in final exams:",
                      chars,"\n"))
+      if (!ignore_unknown_characters) {
+        #browser()
+       for (k in 1:length(utf_hits)) {
+        cur_text <-  replace_symbol_at_position(cur_text, "(UNKNOWN CHARACTER)",k)
+       }
+      }
     }
 
     # if no level is defined, set it to previous level
@@ -166,6 +207,7 @@ converter <- function(input_file,
               current_item_correct
             )
           )
+          item_counter = item_counter + 1
         if (debug) {
           cat("--> Adding question with ", length(current_item_answers)," answers.\n")
         }
@@ -207,7 +249,21 @@ converter <- function(input_file,
 
   }
 
+# some checks
 
+# (x) are there duplicates?
+num_items <- length(items) / 3
+for (i in 1:num_items) {
+  for (j in i:num_items) {
+    if (i==j) next;
+    current_item_text_a <- items[(i - 1) * 3 + 1][[1]]
+    current_item_text_b <- items[(j - 1) * 3 + 1][[1]]
+
+    if (current_item_text_a==current_item_text_b) {
+      warning("Aufgaben ",i," und ",j," scheinen gedoppelt zu sein!")
+    }
+  }
+}
 
 # define file template
 
@@ -259,7 +315,7 @@ ANSWERS
 
     responses <- items[(i - 1) * 3 + 2][[1]]
     correct_response <- items[(i - 1) * 3 + 3][[1]]
-    if (is.null(correct_response)) {
+    if (check_for_missing_solutions && is.null(correct_response)) {
       stop(
         paste0(
           "In item #",
@@ -274,7 +330,9 @@ ANSWERS
     }
 
     exsolution <- rep(0, length(responses))
-    exsolution[correct_response] <- 1
+    if (!is.null(correct_response)) {
+      exsolution[correct_response] <- 1
+    }
     exsolution <- paste0(exsolution, sep = "", collapse = "")
 
     exname <- paste0("Item", i, sep = "", collapse = "")
@@ -316,8 +374,13 @@ ANSWERS
     cur_file <-
       stringr::str_replace(cur_file, "EXSOLUTION", exsolution)
     cur_file <- stringr::str_replace(cur_file, "ANSWERS", rsp)
-    cur_file <-
-      stringr::str_replace(cur_file, "EXSHUFFLE", as.character(length(responses)))
+    if (shuffle_items) {
+      cur_file <-
+        stringr::str_replace(cur_file, "EXSHUFFLE", as.character(length(responses)))
+    } else {
+      cur_file <-
+        stringr::str_replace(cur_file, "EXSHUFFLE", "FALSE")
+    }
     cur_file <- stringr::str_replace(cur_file, "EXNAME", exname)
     cur_file <- stringr::str_replace(cur_file, "EXTYPE", extype)
 

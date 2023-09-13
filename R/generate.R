@@ -10,7 +10,8 @@
 generate <- function(files, n = 1, title = "", name="", course="M99",
                      showpoints = TRUE, intro = "(default)", points = NULL,
                      date = NULL, solution = FALSE, logo=NULL,
-                     institution=NULL, output_dir="exam") {
+                     institution=NULL, output_dir="exam",
+                     startid = 1L, ...) {
 
 if (is.null(points)) {
   points <- rep(1, length(files))
@@ -33,7 +34,7 @@ if (is.null(logo)) {
   }
 
   if (name=="") {
-    name <- paste0("klausur_",course,"_",date,sep="",collapse="")
+    name <- paste0("klausur_",course,"_",date,"_",startid,sep="",collapse="")
   }
 
   if (intro=="(default)") {
@@ -66,8 +67,10 @@ ex1 <- examsMSB::exams2nops(files, n = n,
                   #sep="",collapse = ""),
                   verbose=FALSE,
                   blank = 0,
-                  usepackage=c("color"),
-                  solution = solution
+                  usepackage=c("color", "textcomp"),
+                  solution = solution,
+                  startid = startid,
+                  ...
 )
 
 
