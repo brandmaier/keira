@@ -1,4 +1,12 @@
+#'
+#' @param scans String
+#' @param solutions String
+#' @param partial Boolean
+#'
+#'
 #' @export
+#'
+#'
 evaluate <-
   function(scans,
            solutions,

@@ -5,6 +5,7 @@
 #' @param title
 #' @param name
 #'
+#' @export
 #'
 
 generate <- function(files, n = 1, title = "", name="", course="M99",
