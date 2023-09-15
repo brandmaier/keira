@@ -30,11 +30,14 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          res = NA,
                          style = style_semitransparent,
                          show_points = FALSE,
-                         show_points_total = TRUE,
                          show_points_max = FALSE,
+                         show_points_total = TRUE,
+                         show_points_total_max = FALSE,
                          show_grade = TRUE,
                          show_registration = TRUE,
                          show_exam = FALSE,
+                         show_keira_footer = FALSE,
+                         points_total_max = NULL,
                          debug = FALSE,
                          hints = list(window_width = 480,
                                       yoffset = NA,
@@ -203,7 +206,14 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       frame.plot = FALSE
     )
     rasterImage(x, 0, 0, ncol(x), nrow(x))
-
+    if (show_keira_footer) {
+      text(
+        200*scaling_factor_x,
+        100*scaling_factor_y,
+        labels = paste0("Erstellt mit keira V",packageVersion("keira")," am ",date()),
+        col="black"
+      )
+    }
     if (show_exam) {
       text(
         200 * scaling_factor_x,
@@ -234,12 +244,16 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
     )
     }
     if (show_points_total) {
+      maxp <- ""
+      if (show_points_total_max && !is.null(points_total_max)) {
+        maxp <- paste0(" / ",points_total_max)
+      }
     text(
       200 * scaling_factor_x,
       3400 * scaling_factor_y,
       labels = paste0("Punkte: ", round(as.numeric(
         evalcsv$points[i]
-      ), 2)),
+      ), 2), maxp),
       cex = 5 * scaling_cex,
       col = "red"
     )
