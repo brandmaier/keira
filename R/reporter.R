@@ -132,7 +132,13 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
     on.exit({
       dev.off()
     })
-    x <- png::readPNG(paste0(path, "/", fname, sep = "", collapse = ""))
+    pfname <- paste0(path, "/", fname, sep = "", collapse = "")
+    if (!file.exists(pfname)) {
+      if (debug) { warning("Skipping non-existing file: ", pfname); next;} else {
+        stop("File does not exist: ",pfname)
+      }
+    }
+    x <- png::readPNG(pfname)
 
     pixelwidth <- dim(x)[2]
     pixelheight <- dim(x)[1]
