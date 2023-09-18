@@ -3,6 +3,10 @@ pdf2png <- function(files,
                     output_dir = "",
                     dpi = 300)
 {
+  if (dir.exists(files)) {
+    files <- list.files(files, full.names=TRUE)
+  }
+
   files <- sapply(files, normalizePath)
 
   if (output_dir != "") {

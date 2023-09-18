@@ -7,5 +7,9 @@ flip_png <- function(x){
 
 flip <- function(files)
 {
+  if (dir.exists(files)) {
+    files <- list.files(files, full.names = TRUE)
+  }
+
   sapply(files, flip_png)
 }
