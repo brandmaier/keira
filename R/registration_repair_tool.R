@@ -3,15 +3,16 @@ get_duplicates <- function(daten)
   registrations <- daten$V6
 
   dups <- duplicated(registrations)
+  dups_rev <- duplicated(registrations, fromLast = TRUE)
 
   zeros <- (as.numeric(registrations) == 0)
-  dups <- dups | zeros
+  dups <- dups | dups_rev | zeros
 
   return(dups)
 }
 
 
-do_something <- function(daten, path, show_image) {
+do_something <- function(daten, path, show_image, prop, d4) {
   dups <- get_duplicates(daten)
 
   if (any(dups)) {
@@ -71,11 +72,13 @@ registration_repair_tool <- function(path,
 
   correction_needed = TRUE
   while (correction_needed) {
-    daten <- do_something(daten, path, show_image)
+    daten <- do_something(daten, path, show_image, prop, d4)
+
+    browser()
 
     # Do we need more corrections?
     dups <- get_duplicates(daten)
-    correction_needed <- any(dups,na.rm = TRUE)
+    correction_needed <- any(dups)
     if (correction_needed) {
       cat(
         "New mismatches discovered after correction. Please continue with corrections.\n"

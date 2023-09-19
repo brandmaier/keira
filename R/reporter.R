@@ -314,7 +314,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
     # stretch factor is 1807 (if page is shrunken to DINA4 to 96%)
     stretch_factor <- (bottomright_match$colmin - topleft_match$colmin)
     stretch_factor <- stretch_factor / 1882
-    cat("Stretch x", stretch_factor, "%\n")
+   # cat("Stretch x", stretch_factor, "%\n")
 
     gapx1 <- gapx1 * stretch_factor
     gapx2 <- gapx2 * stretch_factor
