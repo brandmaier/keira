@@ -74,8 +74,6 @@ registration_repair_tool <- function(path,
   while (correction_needed) {
     daten <- do_something(daten, path, show_image, prop, d4)
 
-    browser()
-
     # Do we need more corrections?
     dups <- get_duplicates(daten)
     correction_needed <- any(dups)
