@@ -3,7 +3,7 @@
 plot_item_difficulty <- function(eval_file = "nops_eval.csv",
                                  maxpoints = 1,
                                  cols=c("green", "blue", "red")) {
-  pts <- eval_file
+  pts <- read.csv(eval_file,sep=";",dec=",")
 
   pcols_id <-
     which(sapply(names(pts), function(x) {
