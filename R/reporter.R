@@ -38,6 +38,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          show_exam = FALSE,
                          show_keira_footer = FALSE,
                          points_total_max = NULL,
+                         filename_scheme = "registration",
                          debug = FALSE,
                          hints = list(window_width = 480,
                                       yoffset = NA,
@@ -170,11 +171,18 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
     else
       file_ending <- ""
 
+    if (startsWith(filename_scheme, "f")) {
+      outfile_basename <- gsub("\\..*", "", evalcsv$scan[i])
+
+    }  else {
+      outfile_basename <-  evalcsv$registration[i]
+    }
+
     outfile <-
       paste0(
         outfolder,
         "/",
-        evalcsv$registration[i],
+        outfile_basename,
         file_ending,
         sep = "",
         collapse = ""
@@ -264,8 +272,12 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       col = "red"
     )
     }
-    #- (62 * scaling_factor_y)
-    startpos_rel <- c(-55, 1720-62) / c(2480, 3507) #* c(scaling_factor_x, scaling_factor_y)
+
+    # this is the starting position for the correction
+    # boxes (was 1720-62)
+    startpos_rel <- c(-55, 1720-68) / c(2480, 3507) #* c(scaling_factor_x, scaling_factor_y)
+
+    # these are the regular increments in both x and y direction
     incx_rel <- (420 - 330) / 2480 #* scaling_factor_x
     incy_rel <- (1920 - 1840) / 3507 #* scaling_factor_y
 
