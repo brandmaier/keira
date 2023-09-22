@@ -16,12 +16,13 @@ do_something <- function(daten, path, show_image, prop, d4) {
   dups <- get_duplicates(daten)
 
   if (any(dups)) {
+    cat("I found ", sum(dups)," problems. Let's fix them together!\n")
     dupids <- which(dups)
     for (dupid in dupids) {
       cur_filename <- daten$V1[dupid]
       cur_registration <- daten$V6[dupid]
       cat(
-        "Found duplicates for given registration ",
+        "Found problems with ID",
         toString(cur_registration),
         ". Please enter correct registration ID from picture."
       )
