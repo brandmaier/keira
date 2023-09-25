@@ -2,6 +2,10 @@ get_duplicates <- function(daten)
 {
   registrations <- daten$V6
 
+  if (any(registrations=="")) {
+    registrations[registrations==""] <- "0"
+  }
+
   dups <- duplicated(registrations)
   dups_rev <- duplicated(registrations, fromLast = TRUE)
 
