@@ -3,7 +3,7 @@
 plot_item_difficulty <- function(eval_file = "nops_eval.csv",
                                  maxpoints = 1,
                                  cols=c("green", "blue", "red")) {
-  pts <- read.csv(eval_file,sep=";",dec=",")
+  pts <- read.csv(eval_file,sep=";",dec=".")
 
   pcols_id <-
     which(sapply(names(pts), function(x) {
@@ -33,4 +33,5 @@ plot_item_difficulty <- function(eval_file = "nops_eval.csv",
     ggplot2::scale_fill_manual(values = cols, drop = FALSE) +
     ggplot2::xlim(0, 1)
 
+  #invisible(npts)
 }
