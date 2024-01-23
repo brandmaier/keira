@@ -18,10 +18,63 @@ convert_latex_simple <- function(x) {
   x <- stringr::str_replace_all(x, "\"", " \\\\grqq{}")
   x
 }
+
+
+replace_math_with_placeholders <- function(input_text) {
+  # Regular expression to match substrings between $$
+  regex <- "\\$\\$.*?\\$\\$"
+
+  # Find all matches
+  matches <- regmatches(input_text, gregexpr(regex, input_text))[[1]]
+
+  # Replace each match with a unique placeholder
+  if (length(matches)>0)
+    placeholders <- paste0("latex_math_placeholder_", seq_along(matches))
+  else
+    placeholders <- NULL
+
+  replaced_text <- input_text
+
+  for (i in seq_along(matches)) {
+    replaced_text <- gsub(matches[i], placeholders[i], replaced_text, fixed = TRUE)
+  }
+
+  return(list(original_text = input_text,
+              replaced_text = replaced_text,
+              placeholders = placeholders,
+              matches = matches))
+}
+
+replace_with_original <- function(replaced_text,
+                                  placeholders,
+                                  original_strings) {
+
+  if (length(placeholders)==0) return(replaced_text)
+
+  for (i in seq_along(placeholders)) {
+
+    ostr<-original_strings[i]
+    # remove trailing and leading $ to convert $$ to inline math
+    ostr <- substr(ostr, 2, nchar(ostr)-1)
+    # double every backslash such that they do not get lost
+    ostr <- gsub("\\\\", "\\\\\\\\", ostr)
+
+    replaced_text <- gsub(placeholders[i],
+                          ostr,
+                          replaced_text, fixed = TRUE)
+  }
+  return(replaced_text)
+}
+
 #'
 #'
 #' @export
 convert_latex <- function(x) {
+
+  # replace all LaTeX math parts with placeholders
+  # to avoid damage
+  math_objects <- replace_math_with_placeholders(x)
+  x <- math_objects$replaced_text
 
   x <- stringr::str_replace_all(x, "ß", "{\\\\\\\\ss}")
   x <- stringr::str_replace_all(x, "%", "{\\\\\\\\%}")
@@ -51,7 +104,16 @@ convert_latex <- function(x) {
   x <- stringr::str_replace_all(x, "ü", "\\\\\\\\\"u")
   x <- stringr::str_replace_all(x, "₵", "\\\\\\\\textcolonmonetary")
 
+  # greek letters
+  x <- stringr::str_replace_all(x, "α", "$\\\\\\\\alpha$")
+  x <- stringr::str_replace_all(x, "β", "$\\\\\\\\beta$")
+  x <- stringr::str_replace_all(x, "μ", "$\\\\\\\\mu$")
   #str.decode("utf-8").replace(u"\u2022", "*")
+
+  # restore math to inline math equations
+  x <- replace_with_original(x,
+                             math_objects$placeholders,
+                             math_objects$matches)
 
   x
 }
@@ -311,6 +373,23 @@ ANSWERS
 
     # remove hash tags
     current_item_text <- gsub("#[[:alnum:]:\\.]+", "", current_item_text)
+
+    # get image tags
+    pattern_full <- "\\[img:.*?\\]"
+    pattern <- "\\[img:(.*?)\\]"
+
+    # Use regex match to extract the desired parts
+    matches <- regmatches(current_item_text ,
+                          gregexpr(pattern, current_item_text ))[[1]]
+    #cat("Matches for IMG: ", matches, "\n")
+    # Extract the captured group
+    extracted_text <- gsub("\\[img:|\\]", "", matches)
+    # add path
+    extracted_text <- paste0(here::here(),.Platform$file.sep, extracted_text)
+
+    incl_text <- paste0("\n\n \\\\\\\\includegraphics{",extracted_text,"}\n\n")
+    current_item_text <- gsub(pattern_full, incl_text, current_item_text)
+
 
 
     responses <- items[(i - 1) * 3 + 2][[1]]
