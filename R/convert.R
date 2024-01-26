@@ -431,7 +431,6 @@ ITEM_POINTS
 
     # are there specific points per exam?
     if (length(matches)>0) {
-      browser()
       mtep <- unlist(sapply(matches, extract_points_from_hashtag))
       if (!all(is.null(mtep))) {
       extracted_points <- max(mtep)
