@@ -206,8 +206,9 @@ converter <- function(input_file,
     if (!is.null(utf_hits)) {
       chars <- paste0(sapply(utf_hits, function(pos){ substr(cur_text,pos,pos) }),sep="",collapse = " ")
       warning(paste0("Found non-ASCII characters in response ",current_answer_id," of item ",
-                     item_counter,", which may not show up in final exams:",
-                     chars,"\n"))
+                     (item_counter+1),", which may not show up in final exams:",
+                     chars, "(item starts with:'",substr(cur_text,1,15),"')","\n"))
+      flush.console()
       if (!ignore_unknown_characters) {
         #browser()
        for (k in 1:length(utf_hits)) {
@@ -338,6 +339,7 @@ ANSWERS
 \\end{answerlist}
 \\end{question}
 
+ITEM_POINTS
 \\exname{EXNAME}
 \\extype{EXTYPE}
 \\exsolution{EXSOLUTION}
@@ -379,11 +381,11 @@ ANSWERS
     pattern <- "\\[img:(.*?)\\]"
 
     # Use regex match to extract the desired parts
-    matches <- regmatches(current_item_text ,
+    img_matches <- regmatches(current_item_text ,
                           gregexpr(pattern, current_item_text ))[[1]]
     #cat("Matches for IMG: ", matches, "\n")
     # Extract the captured group
-    extracted_text <- gsub("\\[img:|\\]", "", matches)
+    extracted_text <- gsub("\\[img:|\\]", "", img_matches)
     # add path
     extracted_text <- paste0(here::here(),.Platform$file.sep, extracted_text)
 
@@ -426,6 +428,24 @@ ANSWERS
     for (j in 1:length(responses)) {
       rsp <- paste0(rsp, "\\\\item ", convert_latex(responses[j]), "\n")
     }
+
+    # are there specific points per exam?
+    if (length(matches)>0) {
+      browser()
+      mtep <- unlist(sapply(matches, extract_points_from_hashtag))
+      if (!all(is.null(mtep))) {
+      extracted_points <- max(mtep)
+      if (!is.null(extracted_points)) {
+        cur_file <-
+          stringr::str_replace(cur_file, "ITEM_POINTS",
+                               paste0("\\\\expoints{",extracted_points,"}"))
+      }
+
+      }
+    }
+    cur_file <-
+      stringr::str_replace(cur_file, "ITEM_POINTS",
+                           "")
 
 
     # type inference

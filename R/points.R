@@ -34,3 +34,13 @@ infer_points <- function(ll, schoice, mchoice) {
   }
   return(p)
 }
+
+extract_points_from_hashtag <- function(s) {
+  match <- sub("^#?p(\\d+)$", "\\1", s)
+
+  if (match != s) {
+    return(as.integer(match))
+  } else {
+    return(NULL)
+  }
+}

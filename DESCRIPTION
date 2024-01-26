@@ -1,7 +1,7 @@
 Package: keira
 Type: Package
 Title: an interface to generate machine-readable exams from a Word template file
-Version: 0.1.1
+Version: 0.2
 Author:  Andreas M. Brandmaier <andreas.brandmaier@medicalschool-berlin.de>
 Maintainer: Andreas M. Brandmaier <andreas.brandmaier@medicalschool-berlin.de>
 Description: An interface to the exams package to generate machine-readable exams from a Word template file and generate fancy report cards
