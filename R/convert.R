@@ -6,6 +6,7 @@
 
 
 convert_latex_simple <- function(x) {
+  x <- stringr::str_replace_all(x, "\"", " \\\\grqq{}") # this must come before the Umlaut conversion!
   x <- stringr::str_replace_all(x, "Ä", "\\\"A")
   x <- stringr::str_replace_all(x, "Ö", "\\\"O")
   x <- stringr::str_replace_all(x, "Ü", "\\\"U")
@@ -15,7 +16,7 @@ convert_latex_simple <- function(x) {
   x <- stringr::str_replace_all(x, "ß", "{\\ss}")
   x <- stringr::str_replace_all(x, "\n", " \\\\ ")
   x <- stringr::str_replace_all(x, "&", "{\\\\&}")
-  x <- stringr::str_replace_all(x, "\"", " \\\\grqq{}")
+
   x
 }
 
@@ -109,6 +110,9 @@ convert_latex <- function(x) {
   x <- stringr::str_replace_all(x, "β", "$\\\\\\\\beta$")
   x <- stringr::str_replace_all(x, "μ", "$\\\\\\\\mu$")
   #str.decode("utf-8").replace(u"\u2022", "*")
+
+  # newlines
+  x <- stringr::str_replace_all(x, "\n", " \\\\\\\\newline \n")
 
   # restore math to inline math equations
   x <- replace_with_original(x,
@@ -390,6 +394,22 @@ ITEM_POINTS
     extracted_text <- paste0(here::here(),.Platform$file.sep, extracted_text)
 
     incl_text <- paste0("\n\n \\\\\\\\includegraphics{",extracted_text,"}\n\n")
+    current_item_text <- gsub(pattern_full, incl_text, current_item_text)
+
+    # get scaled image tags
+    pattern_full <- "\\[_img:.*?\\]"
+    pattern <- "\\[_img:(.*?)\\]"
+
+    # Use regex match to extract the desired parts
+    img_matches <- regmatches(current_item_text ,
+                              gregexpr(pattern, current_item_text ))[[1]]
+    #cat("Matches for IMG: ", matches, "\n")
+    # Extract the captured group
+    extracted_text <- gsub("\\[_img:|\\]", "", img_matches)
+    # add path
+    extracted_text <- paste0(here::here(),.Platform$file.sep, extracted_text)
+
+    incl_text <- paste0("\n\n \\\\\\\\includegraphics[width=\\\\\\\\textwidth]{",extracted_text,"}\n\n")
     current_item_text <- gsub(pattern_full, incl_text, current_item_text)
 
 

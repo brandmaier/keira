@@ -11,7 +11,6 @@ extract_number <- function(string) {
 }
 
 infer_points <- function(ll, schoice, mchoice) {
-  #browser()
   cmpexp <- startsWith(ll, "\\expoints")
   has_expoints_line <- any(cmpexp)
   if (!has_expoints_line) {
@@ -30,7 +29,7 @@ infer_points <- function(ll, schoice, mchoice) {
     # read out points
     if (sum(cmpexp)>1) stop("Error: Multiple expoints given!")
     exl <- ll[cmpexp]
-    p <- extract_points(exl)
+    p <- extract_number(exl)
   }
   return(p)
 }
