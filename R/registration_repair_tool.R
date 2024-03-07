@@ -50,13 +50,12 @@ do_something <- function(daten, path, show_image, prop, d4) {
   return(daten)
 }
 
-registration_repair_tool <- function(path,
+registration_repair_tool <- function(path=latest_nops_zipfile(),
                                      prop = 0.5,
                                      d4 = 3,
                                      show_image = TRUE,
                                      recursive = TRUE,
                                      file_out = TRUE) {
-  #path <- "misc/testsuite/45items/scans_png/nops_scan_20230713094857.zip"
 
   original_path <- path
   original_dir <- dirname(path)
