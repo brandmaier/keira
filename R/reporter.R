@@ -322,6 +322,42 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
     rowmin <- topleft_match$rowmin
     colmin <- topleft_match$colmin
 
+    # obtain rotation degrees
+    topright_match <-
+      find_crosshair(x,
+                     starty = topleft_match$rowmin-100,
+                     startx = (1800 * scaling_factor_x),
+                     window_width = (450* scaling_factor_x),
+                     height_increment = 100 * scaling_factor_y,
+                     max_window_height=200)
+    if (debug) {
+    myrect(
+      x1=(1800 * scaling_factor_x),
+      y1=(150*scaling_factor_y),
+      x2=(1800 * scaling_factor_x)+(450*scaling_factor_x),
+      y2=(150*scaling_factor_y)+(100*scaling_factor_y),
+      lwd=3,
+      col="orange",
+      pixelheight=pixelheight
+    )
+    myrect(
+      x1 =topright_match$colmin - 20,
+      y1 = topright_match$rowmin - 20,
+      x2 = topright_match$colmin + 20,
+      y2 = topright_match$rowmin + 20,
+      lwd = 3,
+      col = "blue",
+      pixelheight = pixelheight
+    )
+    }
+    try({
+      xdiff <- topright_match$colmin - topleft_match$colmin
+      ydiff <- topright_match$rowmin - topleft_match$rowmin
+      angle <- atan2(ydiff,xdiff) * 180 / pi
+      cat("Ydiff ",ydiff," and Xdiff:",xdiff,"; rotation angle: ",angle,"\n")
+    })
+
+
     # stretch factor is 1882 (if page is 100% but printed on DINA4)
     # stretch factor is 1807 (if page is shrunken to DINA4 to 96%)
     stretch_factor <- (bottomright_match$colmin - topleft_match$colmin)
@@ -559,41 +595,6 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
 
   on.exit({
   })
-
-}
-
-find_crosshair <- function(x,
-                           start_window_height = 100,
-                           max_window_height = 300,
-                           starty = 200,
-                           startx = 0,
-                           window_width = 400,
-                           height_increment = 100) {
-  # find fixation cross
-  window_height <- start_window_height # from 100 to 300
-  found <- FALSE
-  while (!found && window_height <= max_window_height) {
-    searchwindow_topleft_mark <-
-      x[starty:(starty + window_height), startx:(startx + window_width), 1]
-
-    rowmin <-
-      which.min(apply(searchwindow_topleft_mark, 1, mean))  # Zeile
-    colmin <-
-      which.min(apply(searchwindow_topleft_mark, 2, mean))  # Spalte
-
-    window_height = window_height + height_increment
-
-    minvalrow <- min((apply(searchwindow_topleft_mark, 1, mean)))
-
-    if (minvalrow < 0.99)
-      found <- TRUE
-  }
-
-  return(list(
-    found = found,
-    rowmin = starty + rowmin,
-    colmin = startx + colmin
-  ))
 
 }
 
