@@ -354,7 +354,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       xdiff <- topright_match$colmin - topleft_match$colmin
       ydiff <- topright_match$rowmin - topleft_match$rowmin
       angle <- atan2(ydiff,xdiff) * 180 / pi
-      cat("Ydiff ",ydiff," and Xdiff:",xdiff,"; rotation angle: ",angle,"\n")
+      if (debug)      cat("Ydiff ",ydiff," and Xdiff:",xdiff,"; rotation angle: ",angle,"\n")
     })
 
 
@@ -497,6 +497,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
             browser()
         }
 
+        # draw label with points achieved
         text(
           x = pos_x - (95 * scaling_factor_x),
           y = pixelheight - pos_y - (10 * scaling_factor_y),
@@ -504,6 +505,35 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
           col = "red",
           cex = 2 * scaling_cex
         )
+      }
+
+      # no answer given at all?
+      if (contains_only_zeros(answer_pattern)) {
+       # cat("Answer pattern: ", answer_pattern, " at item ",j, " in file ",outfile_basename, " points:",points, "\n")
+
+        within_col_j <- (j - 1) %% 15 + 1
+        column <- ((j - 1) %/% 15) + 1
+
+        pos_y <-
+          startpos_rel[2] + (incy_rel) * (within_col_j - 1) + ((within_col_j - 1) %/% 5) *
+          extragapy_rel
+        pos_x <- startpos_rel[1]
+
+        if (column == 2)
+          pos_x <- pos_x + gapx1
+        if (column == 3)
+          pos_x <- pos_x + gapx1 + gapx2
+
+        pos_x <- pos_x * pixelwidth + xoffset
+
+        pos_y <- pos_y * pixelheight + yoffset - 2
+
+        box_width <- (400 * scaling_factor_x)
+        box_height <- (44 * scaling_factor_y) + 4
+
+        myrect(pos_x, pos_y, pos_x+box_width, pos_y+box_height,col = "yellow", lwd=7*scaling_cex,
+               pixelheight = pixelheight)
+
       }
 
       for (k in 1:5) {
@@ -603,4 +633,8 @@ test_fuzzy_equal <- function(value1, value2, pdiff = 1) {
   percentage_diff <-
     abs(value1 - value2) / ((value1 + value2) / 2) * 100
   return (percentage_diff < pdiff)
+}
+
+contains_only_zeros <- function(input_string) {
+  grepl("^0+$", input_string)
 }
