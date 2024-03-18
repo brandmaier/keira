@@ -14,9 +14,13 @@
 #'
 #' @param nops_eval_file String. path to evaluation file (typically nops_eval.csv)
 #' @param path_to_scans String. file path to folder with individual scans of exam front pages
-#' @param show_points Boolean.
+#' @param show_points Boolean. Show the points achieved per each item
+#' @param show_points_max Boolean. Show the maximum points achievable per each item
+#' @param show_points_total Boolean. Show the total points achieved in this exam
+#' @param show_points_total_max Boolean. Show the maximum points achievable in the entire exam
 #' @param show_registration Boolean. Print the recognized registration number on the report card
 #' @param show_grade Boolean. Print the final grade on the report card
+#' @param points_total_max Integer. Maximum achievable points in the exam
 #'
 #' @author Andreas M. Brandmaier
 #'
@@ -354,6 +358,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       xdiff <- topright_match$colmin - topleft_match$colmin
       ydiff <- topright_match$rowmin - topleft_match$rowmin
       angle <- atan2(ydiff,xdiff) * 180 / pi
+      angle <- angle + 0.23 # heuristic offset
       if (debug)      cat("Ydiff ",ydiff," and Xdiff:",xdiff,"; rotation angle: ",angle,"\n")
     })
 

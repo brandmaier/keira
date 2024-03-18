@@ -366,6 +366,8 @@ ITEM_POINTS
 
   num_items <- length(items) / 3
 
+#  saveRDS(items, file="testfile.rds")
+
   for (i in 1:num_items) {
     cur_item <- items[i]
     cur_file <- file_template

@@ -42,7 +42,7 @@ eval_fun <- examsMSB::exams_eval(partial=FALSE)
 
 examsMSB::nops_eval(register=NULL,
                     solutions="misc/testsuite/45items/exam/klausur_M99_2023-02-15.rds",
-                    scans="misc/testsuite/45items/scans_png/nops_scan_20230713094857.zip",
+                    scans="misc/testsuite/45items/scans_png/nops_scan_20240312164657.zip",
                     mark=ml$marks,
                     labels=ml$labels,
                     eval=eval_fun,
@@ -52,9 +52,10 @@ examsMSB::nops_eval(register=NULL,
 
 
 keira::grade_report(nops_eval_file = "nops_eval.csv",
-                    path_to_scans = "misc/testsuite/45items/scans_png/nops_scan_20230713094857.zip",
+                    path_to_scans = "misc/testsuite/45items/scans_png/nops_scan_20240312164657.zip",
                     outfolder = "reports",
              show_points = TRUE,
              show_points_total_max = TRUE,
-             points_total_max = 99,
-             show_keira_footer = TRUE)
+             points_total_max = 45,
+             show_keira_footer = TRUE,
+             debug=TRUE)

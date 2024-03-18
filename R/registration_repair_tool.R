@@ -16,7 +16,7 @@ get_duplicates <- function(daten)
 }
 
 
-do_something <- function(daten, path, show_image, prop, d4) {
+fix_registration <- function(daten, path, show_image, prop, d4) {
   dups <- get_duplicates(daten)
 
   if (any(dups)) {
@@ -33,9 +33,23 @@ do_something <- function(daten, path, show_image, prop, d4) {
       temp_filename <- paste0(path, "//", cur_filename)
       #cur_png <- png::readPNG(temp_filename)
 
-      if (show_image) {
-        png_i <- examsMSB:::trim_nops_scan(temp_filename)
+      # this should happen only on readout errors, when the
+      # position marks couldn't be read out prroperly
+      if (toString(cur_registration)=="") {
+        cat("\n /!\ Caught irrecoverable error in file ", cur_filename, ". Please manually fix PDF and rerun! Probably, the position marks were unreadable.\n")
+        stop()
+      }
 
+      if (show_image) {
+        png_i <- NULL
+        tryCatch({
+        png_i <- examsMSB:::trim_nops_scan(temp_filename)
+        },catch=function(e){
+          cat("exams package found an error when opening PDF ",cur_filename,":\n\n")
+          print(e)
+          cat("--------\n")
+        })
+        if (is.null(png_i)) {next;}
         png_i <-
           examsMSB:::subimage(png_i,
                               center = c(0.25, 0.87 - 0.04 * as.numeric(substr(d4, 1L, 1L))),
@@ -43,6 +57,7 @@ do_something <- function(daten, path, show_image, prop, d4) {
         examsMSB:::imageplot(png_i, main = cur_filename)
       }
       new_reg <- readline(prompt = paste0("Enter ID: "))
+      if (show_image) { dev.off() }
       daten$V6[dupid] <- new_reg
     } # for id...
   } # if any
@@ -50,6 +65,15 @@ do_something <- function(daten, path, show_image, prop, d4) {
   return(daten)
 }
 
+#'
+#' this is a nifty helper function to fix problems
+#' with answer sheets that have missing information
+#' or appear to be duplicates (because of faulty info)
+#'
+#' @param prop
+#' @param d4
+#' @param show_image  Boolean. Default: TRUE. Show an excerpt of the registration
+#'
 registration_repair_tool <- function(path=latest_nops_zipfile(),
                                      prop = 0.5,
                                      d4 = 3,
@@ -76,7 +100,7 @@ registration_repair_tool <- function(path=latest_nops_zipfile(),
 
   correction_needed = TRUE
   while (correction_needed) {
-    daten <- do_something(daten, path, show_image, prop, d4)
+    daten <- fix_registration(daten, path, show_image, prop, d4)
 
     # Do we need more corrections?
     dups <- get_duplicates(daten)
@@ -88,8 +112,7 @@ registration_repair_tool <- function(path=latest_nops_zipfile(),
     }
   }
 
-  # write result
-
+  # write result to Daten.txt
   write.table(
     x = daten,
     file = paste0(path, "\\Daten.txt"),
@@ -99,6 +122,7 @@ registration_repair_tool <- function(path=latest_nops_zipfile(),
     sep = " "
   )
 
+  # wrap up everything in a ZIP file again
   zip(
     zipfile = paste0(original_path, "-corrected.zip"),
     files = path,
