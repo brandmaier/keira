@@ -1,3 +1,10 @@
+#'
+#' this is a function to create a placeholder zip file
+#' with the original front pages and an empty Daten2.txt
+#' file. This file is useful to run nops_eval() if there
+#' are no scans of the string responses available and
+#' the points achieved are separately coded
+#'
 create_fake_scan <- function(nops_zip) {
 
   temp_dir <- paste0(tempdir(), "\\", "msbexams", sep = "")

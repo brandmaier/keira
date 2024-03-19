@@ -44,6 +44,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          points_total_max = NULL,
                          filename_scheme = "registration",
                          debug = FALSE,
+                         rotate = FALSE,
                          hints = list(window_width = 480,
                                       yoffset = NA,
                                       xoffset = NA,
@@ -224,58 +225,6 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       frame.plot = FALSE
     )
     rasterImage(x, 0, 0, ncol(x), nrow(x))
-    if (show_keira_footer) {
-      text(
-        200*scaling_factor_x,
-        100*scaling_factor_y,
-        labels = paste0("Erstellt mit keira V",packageVersion("keira")," am ",date()),
-        col="black"
-      )
-    }
-    if (show_exam) {
-      text(
-        200 * scaling_factor_x,
-        3100 * scaling_factor_y,
-        labels = paste0("Klausur-ID: ", evalcsv$exam[i]),
-        cex = 5 * scaling_cex,
-        col = "red"
-      )
-    }
-    if (show_registration) {
-      text(
-#        200 * scaling_factor_x,
-#        3200 * scaling_factor_y,
-        1200 * scaling_factor_x,
-        3400 * scaling_factor_y,
-        labels = paste0("Matrikelnummer: ", evalcsv$registration[i]),
-        cex = 5 * scaling_cex,
-        col = "red"
-      )
-    }
-    if (show_grade) {
-    text(
-      200 * scaling_factor_x,
-      3300 * scaling_factor_y,
-      labels = paste0("Note: ", evalcsv$mark[i]),
-      cex = 5 * scaling_cex,
-      col = "red"
-    )
-    }
-    if (show_points_total) {
-      maxp <- ""
-      if (show_points_total_max && !is.null(points_total_max)) {
-        maxp <- paste0(" / ",points_total_max)
-      }
-    text(
-      200 * scaling_factor_x,
-      3400 * scaling_factor_y,
-      labels = paste0("Punkte: ", round(as.numeric(
-        evalcsv$points[i]
-      ), 2), maxp),
-      cex = 5 * scaling_cex,
-      col = "red"
-    )
-    }
 
     # this is the starting position for the correction
     # boxes (was 1720-62)
@@ -358,8 +307,47 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       xdiff <- topright_match$colmin - topleft_match$colmin
       ydiff <- topright_match$rowmin - topleft_match$rowmin
       angle <- atan2(ydiff,xdiff) * 180 / pi
-      angle <- angle + 0.23 # heuristic offset
-      if (debug)      cat("Ydiff ",ydiff," and Xdiff:",xdiff,"; rotation angle: ",angle,"\n")
+      angle <- round( angle + 0.23, 2) # heuristic offset
+#      if (debug)      cat("Ydiff ",ydiff," and Xdiff:",xdiff,"; rotation angle: ",angle,"\n")
+
+      cat("\nProposed rotation ", angle,"° for file ",pfname,"\n")
+
+      # rotate only if non-small deviations
+      if (abs(angle > 0.15) && isTRUE(rotate)) {
+        cat("Rotating image by -", angle, "°\n")
+        #
+        im = imager::load.image(pfname)
+        # load image
+        im = imager::rotate_xy(im,angle = -angle,
+                               cx=pixelwidth/2,
+                               cy=pixelheight/2)
+        # create temp file name and store
+        temp_filename <- paste0(tempfile(),".png")
+        imager::save.image(im = im, file=temp_filename)
+        # re-open temporary rotated file
+        x <- png::readPNG(temp_filename)
+        # overwrite with rotated image
+        rasterImage(x, 0, 0, ncol(x), nrow(x))
+        # delete temp
+        unlink(temp_filename)
+        # Todo re-detect position marks (sin!! this code is duplicated!!)
+        topleft_match <-
+          find_crosshair(x,
+                         starty = (150* scaling_factor_y),
+                         startx = 0,
+                         window_width = (450* scaling_factor_x),
+                         height_increment = 100 * scaling_factor_y)
+
+        bottomright_match <-
+          find_crosshair(x,
+                         starty = (3200 * scaling_factor_y),
+                         startx = (2000 * scaling_factor_x),
+                         window_width = (400* scaling_factor_x),
+                         height_increment = 100 * scaling_factor_y)
+
+        rowmin <- topleft_match$rowmin
+        colmin <- topleft_match$colmin
+      }
     })
 
 
@@ -454,6 +442,60 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
 
     }
     # -- end debug output --
+
+    if (show_keira_footer) {
+      text(
+        200*scaling_factor_x,
+        100*scaling_factor_y,
+        labels = paste0("Erstellt mit keira V",packageVersion("keira")," am ",date()),
+        col="black"
+      )
+    }
+    if (show_exam) {
+      text(
+        200 * scaling_factor_x,
+        3100 * scaling_factor_y,
+        labels = paste0("Klausur-ID: ", evalcsv$exam[i]),
+        cex = 5 * scaling_cex,
+        col = "red"
+      )
+    }
+    if (show_registration) {
+      text(
+        #        200 * scaling_factor_x,
+        #        3200 * scaling_factor_y,
+        1200 * scaling_factor_x,
+        3400 * scaling_factor_y,
+        labels = paste0("Matrikelnummer: ", evalcsv$registration[i]),
+        cex = 5 * scaling_cex,
+        col = "red"
+      )
+    }
+    if (show_grade) {
+      text(
+        200 * scaling_factor_x,
+        3300 * scaling_factor_y,
+        labels = paste0("Note: ", evalcsv$mark[i]),
+        cex = 5 * scaling_cex,
+        col = "red"
+      )
+    }
+    if (show_points_total) {
+      maxp <- ""
+      if (show_points_total_max && !is.null(points_total_max)) {
+        maxp <- paste0(" / ",points_total_max)
+      }
+      text(
+        200 * scaling_factor_x,
+        3400 * scaling_factor_y,
+        labels = paste0("Punkte: ", round(as.numeric(
+          evalcsv$points[i]
+        ), 2), maxp),
+        cex = 5 * scaling_cex,
+        col = "red"
+      )
+    }
+
 
    # scaling_factor_y <- 1
     #scaling_factor_x <- 1
