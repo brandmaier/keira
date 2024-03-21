@@ -45,6 +45,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          filename_scheme = "registration",
                          debug = FALSE,
                          rotate = FALSE,
+                         skip_missing_files = FALSE,
                          hints = list(window_width = 480,
                                       yoffset = NA,
                                       xoffset = NA,
@@ -56,9 +57,11 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
 
   path <- path_to_scans
 
-  if (!file.exists(path)) {
-    stop(paste0("File ", path, " does not exist!"))
+
+  if (!file.exists(path) && !dir.exists(path)) {
+      stop(paste0("File ", path, " does not exist!"))
   }
+
 
   if (endsWith(path, ".zip")) {
     temp_dir <- paste0(tempdir(), "\\", "msbexams", sep = "")
@@ -140,7 +143,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
     })
     pfname <- paste0(path, "/", fname, sep = "", collapse = "")
     if (!file.exists(pfname)) {
-      if (debug) { warning("Skipping non-existing file: ", pfname); next;} else {
+      if (debug || skip_missing_files) { warning("Skipping non-existing file: ", pfname); next;} else {
         stop("File does not exist: ",pfname)
       }
     }
@@ -307,7 +310,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       xdiff <- topright_match$colmin - topleft_match$colmin
       ydiff <- topright_match$rowmin - topleft_match$rowmin
       angle <- atan2(ydiff,xdiff) * 180 / pi
-      angle <- round( angle + 0.23, 2) # heuristic offset
+      angle <- round( angle + 0.15, 2) # heuristic offset (was 0.23)
 #      if (debug)      cat("Ydiff ",ydiff," and Xdiff:",xdiff,"; rotation angle: ",angle,"\n")
 
       cat("\nProposed rotation ", angle,"° for file ",pfname,"\n")
@@ -320,7 +323,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         # load image
         im = imager::rotate_xy(im,angle = -angle,
                                cx=pixelwidth/2,
-                               cy=pixelheight/2)
+                               cy=pixelheight/2,)
         # create temp file name and store
         temp_filename <- paste0(tempfile(),".png")
         imager::save.image(im = im, file=temp_filename)
@@ -343,7 +346,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          starty = (3200 * scaling_factor_y),
                          startx = (2000 * scaling_factor_x),
                          window_width = (400* scaling_factor_x),
-                         height_increment = 100 * scaling_factor_y)
+                         height_increment = 100 * scaling_factor_y0)
 
         rowmin <- topleft_match$rowmin
         colmin <- topleft_match$colmin
@@ -412,6 +415,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         pixelheight = pixelheight
       )
       # indicate search window
+
       myrect(
         x1 = 2000*scaling_factor_x,
         x2 = (2000 + 400)*scaling_factor_x,
@@ -426,7 +430,15 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         400*scaling_factor_x,
         300*scaling_factor_y,
         cex = 5 * scaling_cex,
-        labels = paste0("@(", rowmin, ",", colmin, "); (", rowmin2, ",", colmin2, ")"),
+        labels = paste0("crosshairs @(", rowmin, ",", colmin, "); (", rowmin2, ",", colmin2, ")"),
+        col = "blue"
+      )
+
+      text(
+        400*scaling_factor_x,
+        300*scaling_factor_y,
+        cex = 5 * scaling_cex,
+        labels = paste0("Scaling factor x=",scaling_factor_x, " and y=",scaling_factor_y),
         col = "blue"
       )
 

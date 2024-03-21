@@ -22,8 +22,15 @@ find_crosshair <- function(x,
 
     minvalrow <- min((apply(searchwindow_topleft_mark, 1, mean)))
 
-    if (minvalrow < 0.99)
+    # find id of that row
+    minvalrow_id <- which.min((apply(searchwindow_topleft_mark, 1, mean)))
+    # and compute SD of that row
+#    minvalsd <- sqrt(var(searchwindow_topleft_mark[minvalrow_id, ]))
+
+    if (minvalrow < 0.99) {
       found <- TRUE
+ #     cat("\nFound SD: ", minvalsd,"\n")
+    }
   }
 
   return(list(
