@@ -21,6 +21,9 @@
 #' @param show_registration Boolean. Print the recognized registration number on the report card
 #' @param show_grade Boolean. Print the final grade on the report card
 #' @param points_total_max Integer. Maximum achievable points in the exam
+#' @param show_exam Boolean. Print the exam ID
+#' @param rotate. Boolean. Experimental feature. Rotate the sheets if necessary
+#' @param show_keira_footer Boolean. Print a footer with date and keira version. Default: FALSE
 #'
 #' @author Andreas M. Brandmaier
 #'
