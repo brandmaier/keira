@@ -349,7 +349,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          starty = (3200 * scaling_factor_y),
                          startx = (2000 * scaling_factor_x),
                          window_width = (400* scaling_factor_x),
-                         height_increment = 100 * scaling_factor_y0)
+                         height_increment = 100 * scaling_factor_y)
 
         rowmin <- topleft_match$rowmin
         colmin <- topleft_match$colmin
@@ -468,8 +468,8 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
     }
     if (show_exam) {
       text(
-        200 * scaling_factor_x,
-        3100 * scaling_factor_y,
+        1200 * scaling_factor_x,
+        3300 * scaling_factor_y,
         labels = paste0("Klausur-ID: ", evalcsv$exam[i]),
         cex = 5 * scaling_cex,
         col = "red"
