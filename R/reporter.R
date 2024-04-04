@@ -14,6 +14,7 @@
 #'
 #' @param nops_eval_file String. path to evaluation file (typically nops_eval.csv)
 #' @param path_to_scans String. file path to folder with individual scans of exam front pages
+#' @param outfolder String. Path to directory where reports are written to.
 #' @param show_points Boolean. Show the points achieved per each item
 #' @param show_points_max Boolean. Show the maximum points achievable per each item
 #' @param show_points_total Boolean. Show the total points achieved in this exam
@@ -21,9 +22,10 @@
 #' @param show_registration Boolean. Print the recognized registration number on the report card
 #' @param show_grade Boolean. Print the final grade on the report card
 #' @param points_total_max Integer. Maximum achievable points in the exam
-#' @param show_exam Boolean. Print the exam ID
+#' @param show_exam_id Boolean. Print the exam ID
 #' @param rotate. Boolean. Experimental feature. Rotate the sheets if necessary
 #' @param show_keira_footer Boolean. Print a footer with date and keira version. Default: FALSE
+#' @param debug Boolean. FALSE by default. Output debug output such as OCR marks on PDF.
 #'
 #' @author Andreas M. Brandmaier
 #'
@@ -42,7 +44,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          show_points_total_max = FALSE,
                          show_grade = TRUE,
                          show_registration = TRUE,
-                         show_exam = FALSE,
+                         show_exam_id = FALSE,
                          show_keira_footer = FALSE,
                          points_total_max = NULL,
                          filename_scheme = "registration",
@@ -316,11 +318,11 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
       angle <- round( angle + 0.15, 2) # heuristic offset (was 0.23)
 #      if (debug)      cat("Ydiff ",ydiff," and Xdiff:",xdiff,"; rotation angle: ",angle,"\n")
 
-      cat("\nProposed rotation ", angle,"° for file ",pfname,"\n")
+     if (debug) cat("\nProposed rotation ", angle,"° for file ",pfname,"\n")
 
       # rotate only if non-small deviations
       if (abs(angle > 0.15) && isTRUE(rotate)) {
-        cat("Rotating image by -", angle, "°\n")
+        #cat("Rotating image by -", angle, "°\n")
         #
         im = imager::load.image(pfname)
         # load image
@@ -466,7 +468,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         col="black"
       )
     }
-    if (show_exam) {
+    if (show_exam_id) {
       text(
         1200 * scaling_factor_x,
         3300 * scaling_factor_y,
