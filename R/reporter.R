@@ -595,7 +595,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         box_width <- (400 * scaling_factor_x)
         box_height <- (44 * scaling_factor_y) + 4
 
-        myrect(pos_x, pos_y, pos_x+box_width, pos_y+box_height,col = "yellow", lwd=7*scaling_cex,
+        style$rect(pos_x, pos_y, pos_x+box_width, pos_y+box_height,col = "yellow", lwd=7*scaling_cex,
                pixelheight = pixelheight)
 
       }
