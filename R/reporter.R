@@ -129,13 +129,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
     }
 
   if (is.null(style))
-    style <-
-    list(
-      hatch = hatch,
-      rect = myrect,
-      correct_rejection = function(...) {
-      }
-    )
+    style <- style_semitransparent
 
   for (i in 1:nexams) {
     id <- evalcsv$registration[i]
@@ -595,8 +589,9 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         box_width <- (400 * scaling_factor_x)
         box_height <- (44 * scaling_factor_y) + 4
 
-        style$rect(pos_x, pos_y, pos_x+box_width, pos_y+box_height,col = "yellow", lwd=7*scaling_cex,
-               pixelheight = pixelheight)
+        #style$rect(pos_x, pos_y, pos_x+box_width, pos_y+box_height,col = "yellow", lwd=7*scaling_cex,
+        #       pixelheight = pixelheight)
+        style$marker(pos_x, pos_y, pos_x+box_width, pos_y+box_height,pixelheight)
 
       }
 
@@ -625,14 +620,14 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         # correct checkmark -> green box
         if (answer == solution && answer == "1") {
           #cat(" |- Correct answer at ",k," drawing at",pos_x,",",pos_y,"\n")
-          style$rect(
+          style$hit(
             pos_x,
             pos_y,
             pos_x + box_width,
             pos_y + box_height,
-            col = "green",
-            pixelheight = pixelheight,
-            lwd = 10 * scaling_cex
+
+            pixelheight = pixelheight
+           # lwd = 10 * scaling_cex
           )
         }
 
@@ -640,14 +635,14 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         if (answer == "1" && solution == "0")
         {
           #cat(" |- Wrong answer at ",k," drawing at",pos_x,",",pos_y,"\n")
-          style$rect(
+          style$false_alarm(
             pos_x,
             pos_y,
             pos_x + box_width,
             pos_y + box_height,
-            col = "red",
-            pixelheight = pixelheight,
-            lwd = 10 * scaling_cex
+            #col = "red",
+            pixelheight = pixelheight
+            #lwd = 10 * scaling_cex
           )
         }
 
@@ -655,14 +650,14 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
         if (solution == "1" && answer == "0")
         {
           #cat(" |- Missed answer at ",k," drawing at",pos_x,",",pos_y,"\n")
-          style$hatch(
+          style$miss(
             pos_x,
             pos_y,
             pos_x + box_width,
             pos_y + box_height,
-            col = "red",
-            pixelheight = pixelheight,
-            lwd = 8 * scaling_cex
+           # col = "red",
+            pixelheight = pixelheight
+            #lwd = 8 * scaling_cex
           )
         }
 
