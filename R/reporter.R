@@ -49,7 +49,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                          points_total_max = NULL,
                          filename_scheme = "registration",
                          debug = FALSE,
-                         rotate = FALSE,
+                         rotate = TRUE,
                          skip_missing_files = FALSE,
                          hints = list(window_width = 480,
                                       yoffset = NA,
@@ -315,7 +315,7 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
      if (debug) cat("\nProposed rotation ", angle,"° for file ",pfname,"\n")
 
       # rotate only if non-small deviations
-      if (abs(angle > 0.15) && isTRUE(rotate)) {
+      if (abs(angle > 0.05) && isTRUE(rotate)) {
         #cat("Rotating image by -", angle, "°\n")
         #
         im = imager::load.image(pfname)
