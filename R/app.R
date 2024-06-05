@@ -38,7 +38,7 @@ shiny::numericInput("points", "Punkte pro Frage",value=1, min=0),
 shiny::textInput("include_tags","Tags (Einschluss)", value=""),
 shiny::textInput("exclude_tags","Tags (Ausschluss)", value=""),
 
-shiny::checkboxInput("shuffle", "Reihenfolge verwürfeln",value = TRUE),
+shiny::checkboxInput("shuffle", "Reihenfolge der Items verwürfeln",value = TRUE),
 
 shiny::textAreaInput("preamble",label="Begrüßungstext",
                      value=std_text,
