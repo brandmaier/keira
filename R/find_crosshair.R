@@ -11,6 +11,12 @@ find_crosshair <- function(x,
                            window_width = 400,
                            height_increment = 100) {
 
+  startx = round(startx)
+  starty = round(starty)
+  window_width = round(window_width)
+  height_increment = round(height_increment)
+  start_window_height = round(start_window_height)
+
   result <- .find_crosshair(x, start_window_height,
                             max_window_height,
                             starty,
@@ -51,9 +57,16 @@ find_crosshair <- function(x,
   window_height <- start_window_height # from 100 to 300
   found <- FALSE
   while (!found && window_height <= max_window_height) {
+
+    monochrome <- (length(dim(x))==2)
+
+    if (monochrome) {
+      searchwindow_topleft_mark <-
+        x[starty:(starty + window_height), startx:(startx + window_width)]
+    } else {
     searchwindow_topleft_mark <-
       x[starty:(starty + window_height), startx:(startx + window_width), 1]
-
+    }
 
   if (heuristic == "mean") {
     mean_whiteness_rowise <- apply(searchwindow_topleft_mark, 1, mean)
