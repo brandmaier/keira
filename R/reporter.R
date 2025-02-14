@@ -26,6 +26,9 @@
 #' @param rotate. Boolean. Experimental feature. Rotate the sheets if necessary
 #' @param show_keira_footer Boolean. Print a footer with date and keira version. Default: FALSE
 #' @param debug Boolean. FALSE by default. Output debug output such as OCR marks on PDF.
+#' @param signature Character. Path to a PNG file with a signature or stamp to imprint. NULL by default.
+#' @param signature_rel_x Integer. Relative position of the signature (if given)
+#' @param signature_rel_y Integer. Relative position of the signature (if given)
 #'
 #' @author Andreas M. Brandmaier
 #'
