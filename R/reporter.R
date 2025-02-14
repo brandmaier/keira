@@ -56,7 +56,10 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
                                       xoffset = NA,
                                       extragapy_rel = NA,
                                       gapx1 = NA,
-                                      gapx2 = NA)) {
+                                      gapx2 = NA),
+                         signature = NULL,
+                         signature_rel_x = 0.6,
+                         signature_rel_y = 0.99) {
   xoffset <- hints$xoffset
   yoffset <- hints$yoffset
 
@@ -674,7 +677,26 @@ grade_report <- function(nops_eval_file = "nops_eval.csv",
 
     }
 
+    # add signature
+    if (!is.null(signature)) {
+      if (file.exists(signature)) {
+        monochrome <- length(dim(x))<3
+        signature_png <- png::readPNG(signature)
+        sig_width <- dim(signature_png)[2]
+        sig_height <- dim(signature_png)[1]
+        nc <- dim(signature_png)[3]
+        sig_x <- pixelwidth*signature_rel_x
+        sig_y <- pixelheight*(1-signature_rel_y)
 
+      #  if (monochrome)
+      #    x[sig_x:(sig_x+sig_height), sig_y:(sig_y+sig_width)]<-signature_png
+      #  else
+       #   x[sig_x:(sig_x+sig_height-1), sig_y:(sig_y+sig_width-1),1:nc]<-signature_png
+        rasterImage(signature_png, sig_x, sig_y, sig_x+sig_width, sig_y+sig_height)
+      }
+    }
+
+    # --
 
     dev.off()
 

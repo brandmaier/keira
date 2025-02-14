@@ -58,4 +58,7 @@ keira::grade_report(nops_eval_file = "nops_eval.csv",
              show_points_total_max = TRUE,
              points_total_max = 45,
              show_keira_footer = TRUE,
+             signature = "signature-brandmaier-blue.png",
+             signature_rel_x=.6,
+             signature_rel_y=1,
              debug=TRUE)
